@@ -1,5 +1,32 @@
 # ORCAView
 
+ORCAView is a graphical user interface (GUI) built with Python and PyQt6 to help computational chemists build and manage input files for the ORCA quantum chemistry package.
+
+## Features
+
+- **Intuitive Tabbed Interface**: The UI is organized into three main tabs for a clear workflow:
+  - **Job Type**: Select the overall type of calculation (e.g., Single Point, Geometry Optimization, Frequency Analysis).
+  - **Method**: Choose the computational method (DFT, HF, Semi-Empirical, xTB) and specify method-specific options like DFT functionals and basis sets.
+  - **Solvation**: Apply solvation models (CPCM, SMD) and select from a list of available solvents.
+- **Dynamic UI**: The interface intelligently updates to show only the relevant options for the selected method and solvation model.
+- **Advanced Options**: Easily specify charge, multiplicity, number of processors, and memory allocation.
+- **Coordinate Editor**: A simple text box for pasting or typing molecular coordinates in XYZ format.
+- **Syntax Highlighting**: The generated ORCA input is displayed with syntax highlighting for improved readability.
+- **File Management**: Save the generated input file or (in a future update) submit it directly to a job queue.
+- **Settings**: Configure the path to the ORCA executable.
+
+## How to Run
+
+1.  **Install Dependencies**: Make sure you have Python installed. Then, install the required packages:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+2.  **Launch the Application**:
+    ```bash
+    python main.py
+    ```
+
 A graphical user interface for building and submitting ORCA quantum chemistry calculations.
 
 ## Features

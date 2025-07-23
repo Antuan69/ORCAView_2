@@ -49,9 +49,11 @@ class OrcaInputGenerator:
 
         # Add blocks
         for block_name, block_content in self.blocks.items():
+            input_lines.append("")  # Add empty line before each block
             input_lines.append(f"%{block_name}")
             input_lines.append(block_content)
             input_lines.append("end")
+
 
         # Add coordinates
         input_lines.append(f"* xyz {self.charge} {self.multiplicity}")

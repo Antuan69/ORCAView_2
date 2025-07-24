@@ -1,5 +1,56 @@
 # ORCAView
 
+ORCAView is a desktop application built with PyQt6 that provides a graphical user interface (GUI) for generating and submitting quantum chemistry calculations to the ORCA software package.
+
+It simplifies the process of creating ORCA input files by allowing users to generate molecular structures from SMILES strings, customize calculation parameters, and submit jobs directly from the application.
+
+## Features
+
+- **SMILES to 3D Structure:** Instantly generate a 3D molecular structure from a SMILES string using RDKit.
+- **2D Depiction:** View a 2D image of the generated molecule.
+- **Customizable Input:** Easily set keywords, calculation methods (DFT, HF, xTB, etc.), basis sets, charge, multiplicity, and solvation models.
+- **File Management:** Use the file browser to specify exact save locations for your input (`.inp`) and output (`.out`) files.
+- **Direct Submission:** Launch ORCA calculations directly from the GUI with a single click.
+- **Syntax Highlighting:** The generated input file text is highlighted for better readability.
+
+## Setup and Installation
+
+1.  **Prerequisites:**
+    -   Python 3.x
+    -   ORCA quantum chemistry software installed and accessible on your system.
+
+2.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd ORCAView
+    ```
+
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+## How to Run
+
+1.  Launch the application:
+    ```bash
+    python main.py
+    ```
+
+2.  **Provide ORCA Path:** Use the "Browse..." button to select the path to your ORCA executable (e.g., `C:/orca/orca.exe`).
+
+3.  **Generate a Structure:**
+    -   Enter a SMILES string (e.g., `CCO` for ethanol) into the SMILES input field.
+    -   Click "Generate Structure from SMILES".
+
+4.  **Customize Calculation:**
+    -   Adjust keywords, job type, method, charge, etc. as needed.
+    -   Click "Generate Input" to see the complete ORCA input file.
+
+5.  **Save and Submit:**
+    -   Use the "Browse..." buttons to choose save locations for your input and output files.
+    -   Click "Save and Submit to ORCA" to start the calculation.
+
 ORCAView is a graphical user interface (GUI) built with Python and PyQt6 to help computational chemists build and manage input files for the ORCA quantum chemistry package.
 
 ## Features

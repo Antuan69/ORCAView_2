@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QFormLayout,
     QLineEdit,
     QPushButton,
@@ -19,10 +20,21 @@ from PyQt6.QtWidgets import (
     QMessageBox
 )
 from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QPixmap
+from rdkit import Chem
+from rdkit.Chem import Draw, AllChem
+import json
+import os
+import logging
+import subprocess
 
 from .input_generator import OrcaInputGenerator
 from .job_submitter import JobSubmitter
 from .syntax_highlighter import OrcaSyntaxHighlighter
+
+
+logging.basicConfig(level=logging.INFO)
+
 
 
 class MainWindow(QMainWindow):
@@ -175,34 +187,87 @@ class MainWindow(QMainWindow):
         self.layout.addLayout(advanced_layout)
 
     def _create_coordinates_section(self):
-        self.layout.addWidget(QLabel("Coordinates (XYZ format):"))
+        coords_layout = QFormLayout()
+
+        # SMILES input
+        self.smiles_input = QLineEdit()
+        self.smiles_input.setPlaceholderText("Enter SMILES string here (e.g., C for methane)")
+        coords_layout.addRow("SMILES Input:", self.smiles_input)
+
+        # Generate button
+        self.generate_from_smiles_button = QPushButton("Generate Structure from SMILES")
+        coords_layout.addRow(self.generate_from_smiles_button)
+
+        # 2D depiction view
+        self.mol_image_label = QLabel("2D depiction will be shown here.")
+        self.mol_image_label.setMinimumSize(400, 300)
+        self.mol_image_label.setStyleSheet("border: 1px solid grey; padding: 5px;")
+        coords_layout.addRow("2D Depiction:", self.mol_image_label)
+
+        # Coordinates output
         self.coordinates_input = QTextEdit()
-        self.load_xyz_button = QPushButton("Load XYZ")
-        self.layout.addWidget(self.coordinates_input)
-        self.layout.addWidget(self.load_xyz_button)
+        self.coordinates_input.setReadOnly(True)
+        self.coordinates_input.setPlaceholderText("Generated 3D coordinates will appear here...")
+        coords_layout.addRow("3D Coordinates (XYZ):", self.coordinates_input)
+        
+        self.layout.addLayout(coords_layout)
 
     def _create_submission_section(self):
+        submission_layout = QFormLayout()
+
+        # ORCA executable path
+        path_layout = QHBoxLayout()
+        self.orca_path_input = QLineEdit()
+        self.orca_path_input.setText(self.settings.value("orca_path", ""))
+        path_layout.addWidget(self.orca_path_input)
+        self.orca_path_button = QPushButton("Browse...")
+        path_layout.addWidget(self.orca_path_button)
+        submission_layout.addRow("ORCA Executable Path:", path_layout)
+
+        # Input File Path
+        input_path_layout = QHBoxLayout()
+        self.input_file_path_input = QLineEdit()
+        self.input_file_path_input.setPlaceholderText("Path to save .inp file")
+        input_path_layout.addWidget(self.input_file_path_input)
+        self.input_file_browse_button = QPushButton("Browse...")
+        input_path_layout.addWidget(self.input_file_browse_button)
+        submission_layout.addRow("Input File:", input_path_layout)
+
+        # Output File Path
+        output_path_layout = QHBoxLayout()
+        self.output_file_path_input = QLineEdit()
+        self.output_file_path_input.setPlaceholderText("Path to save .out file")
+        output_path_layout.addWidget(self.output_file_path_input)
+        self.output_file_browse_button = QPushButton("Browse...")
+        output_path_layout.addWidget(self.output_file_browse_button)
+        submission_layout.addRow("Output File:", output_path_layout)
+
+        # Buttons and output text
         self.generate_button = QPushButton("Generate Input")
+        self.save_button = QPushButton("Save and Submit to ORCA")
         self.output_text = QTextEdit()
         self.output_text.setReadOnly(True)
-        self.save_button = QPushButton("Save and Submit")
-        self.layout.addWidget(self.generate_button)
-        self.layout.addWidget(QLabel("Generated Input:"))
-        self.layout.addWidget(self.output_text)
-        self.layout.addWidget(self.save_button)
+        self.output_text.setFont(QFont("Courier New", 10))
+
+        # Add widgets in a way that QFormLayout understands
+        submission_layout.addRow(self.generate_button)
+        submission_layout.addRow(self.output_text)
+        submission_layout.addRow(self.save_button)
+
+        self.layout.addLayout(submission_layout)
 
     def _initialize_backend(self):
-        self.generator = OrcaInputGenerator()
-        orca_path = self.settings.value("orca_path", "path/to/orca.exe")
-        self.submitter = JobSubmitter(orca_path=orca_path)
         self.highlighter = OrcaSyntaxHighlighter(self.output_text.document())
 
     def _connect_signals(self):
         self.method_combo.currentTextChanged.connect(self._update_ui_for_method)
         self.solvation_model_combo.currentTextChanged.connect(self._update_solvent_dropdown)
-        self.load_xyz_button.clicked.connect(self._load_xyz)
+        self.generate_from_smiles_button.clicked.connect(self._generate_structure_from_smiles)
+        self.orca_path_button.clicked.connect(self._browse_for_orca)
         self.generate_button.clicked.connect(self._generate_input)
         self.save_button.clicked.connect(self._save_and_submit)
+        self.input_file_browse_button.clicked.connect(self._browse_for_input_file)
+        self.output_file_browse_button.clicked.connect(self._browse_for_output_file)
 
     def _update_ui_for_method(self, method):
         is_dft = method == "DFT"
@@ -262,135 +327,187 @@ class MainWindow(QMainWindow):
                     self.solvent_combo.setCurrentText(water_actual)
 
     def _generate_input(self):
+        # Create a new generator for every run to ensure a clean state
+        generator = OrcaInputGenerator()
+
+        # 1. Set Keywords
         job_type = self.job_type_combo.currentText()
         method = self.method_combo.currentText()
         other_keywords = self.other_keywords_input.text()
-
         dft_functional = self.dft_functional_combo.currentText()
-        if dft_functional.startswith("---"):
-            dft_functional = ""
-
         basis_set = self.basis_set_combo.currentText()
-
-        if basis_set.startswith("---"):
-            basis_set = "def2-SVP" # Default basis set
-
-        method_keyword = ""
-        if method == "DFT":
-            method_keyword = dft_functional
-        elif method == "HF":
-            method_keyword = "HF"
-        elif method == "Semi-Empirical":
-            se_method = self.semiempirical_combo.currentText()
-            method_keyword = self.semiempirical_methods.get(se_method, "")
-        elif method == "xTB":
-            xtb_method = self.xtb_combo.currentText()
-            method_keyword = self.xtb_methods.get(xtb_method, "")
-
-        # Basis sets are often implicit for Semi-Empirical and xTB methods
-        basis_set_keyword = basis_set if method in ["DFT", "HF"] else ""
-
-        solvation_keyword = ""
+        se_method = self.semiempirical_combo.currentText()
+        xtb_method = self.xtb_combo.currentText()
         solvation_model = self.solvation_model_combo.currentText()
+        solvent = self.solvent_combo.currentText()
+
+        keyword_parts = [self.job_types.get(job_type, "")]
+        if method == "DFT":
+            keyword_parts.append(dft_functional if not dft_functional.startswith("---") else "")
+            keyword_parts.append(basis_set if not basis_set.startswith("---") else "def2-SVP")
+        elif method == "HF":
+            keyword_parts.append("HF")
+            keyword_parts.append(basis_set if not basis_set.startswith("---") else "def2-SVP")
+        elif method == "Semi-Empirical":
+            keyword_parts.append(self.semiempirical_methods.get(se_method, ""))
+        elif method == "xTB":
+            keyword_parts.append(self.xtb_methods.get(xtb_method, ""))
+
         if solvation_model and solvation_model != "None":
-            solvent = self.solvent_combo.currentText()
-            # CPCMC is a shortcut for CPCM with a specific epsilon function
             model_keyword = "CPCM" if solvation_model == "CPCMC" else solvation_model
             if solvent:
-                solvation_keyword = f"{model_keyword}({solvent})"
+                keyword_parts.append(f"{model_keyword}({solvent})")
 
-        # Collect all keyword parts into a list
-        keyword_parts = [self.job_types.get(job_type, ""), method_keyword, basis_set_keyword, solvation_keyword]
-        
-        # Add user-defined keywords, splitting them by space to handle multiple keywords
         if other_keywords:
             keyword_parts.extend(other_keywords.split())
 
-        # Filter out any empty strings from the list of keyword parts
-        final_keywords = [part for part in keyword_parts if part]
+        generator.set_keywords([part for part in keyword_parts if part])
 
-        self.generator.set_keywords(final_keywords)
-
+        # 2. Set Charge and Multiplicity
         charge = self.charge_input.value()
         multiplicity = self.multiplicity_input.value()
-        self.generator.set_charge_and_multiplicity(charge, multiplicity)
+        generator.set_charge_and_multiplicity(charge, multiplicity)
 
-        coords_text = self.coordinates_input.toPlainText().strip().split('\n')
+        # 3. Set Coordinates
+        coords_text = self.coordinates_input.toPlainText().strip()
+        if not coords_text:
+            QMessageBox.warning(self, "Input Error", "Coordinates are missing. Please generate a structure first.")
+            return
+        
         coordinates = []
-        for line in coords_text:
+        for line in coords_text.split('\n'):
             parts = line.split()
             if len(parts) == 4:
-                atom = parts[0]
-                x, y, z = map(float, parts[1:])
-                coordinates.append([atom, x, y, z])
-        self.generator.set_coordinates(coordinates)
+                try:
+                    atom = parts[0]
+                    x, y, z = map(float, parts[1:])
+                    coordinates.append([atom, x, y, z])
+                except (ValueError, IndexError):
+                    QMessageBox.warning(self, "Coordinate Error", f"Could not parse coordinate line: {line}")
+                    return
+        generator.set_coordinates(coordinates)
 
-        # Add PAL block for processors
+        # 4. Set Blocks
         nprocs = self.nprocs_input.value()
-        self.generator.add_block("pal", f"nprocs {nprocs}")
-
-        # Add maxcore block for memory
+        generator.add_block("pal", f"nprocs {nprocs}")
         memory = self.memory_input.text()
         if memory.isdigit():
-            self.generator.add_block("maxcore", memory)
+            generator.add_block("maxcore", memory)
 
-        generated_input = self.generator.generate_input()
+        # 5. Generate and Display
+        generated_input = generator.generate_input()
         self.output_text.setPlainText(generated_input)
 
-    def _load_xyz(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "Load XYZ File", "", "XYZ Files (*.xyz);;All Files (*)"
-        )
-        if file_path:
-            try:
-                with open(file_path, "r") as f:
-                    lines = f.readlines()
-                
-                # XYZ format: first two lines are atom count and a comment
-                coord_lines = lines[2:]
-                self.coordinates_input.setPlainText("".join(coord_lines))
-                QMessageBox.information(
-                    self, "Success", f"Coordinates loaded from {file_path}"
-                )
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Could not load XYZ file: {e}")
+    def _generate_structure_from_smiles(self):
+        """Generates and optimizes a 3D structure from a SMILES string."""
+        smiles = self.smiles_input.text()
+        if not smiles:
+            QMessageBox.warning(self, "Input Error", "Please enter a SMILES string.")
+            return
+
+        try:
+            # Create molecule from SMILES
+            mol = Chem.MolFromSmiles(smiles)
+            if mol is None:
+                raise ValueError("Invalid SMILES string")
+
+            # --- Generate 2D Depiction by saving to a temporary file ---
+            temp_img_file = "_temp_mol.png"
+            Draw.MolToFile(mol, temp_img_file, size=(400, 300))
+            pixmap = QPixmap(temp_img_file)
+            self.mol_image_label.setPixmap(pixmap)
+            # Clean up the temporary file
+            if os.path.exists(temp_img_file):
+                os.remove(temp_img_file)
+
+            # --- Generate 3D Coordinates ---
+            mol_with_h = Chem.AddHs(mol, addCoords=True)
+            # Use ETKDGv3 for better coordinate generation
+            params = AllChem.ETKDGv3()
+            params.randomSeed = 1 # for reproducibility
+            AllChem.EmbedMolecule(mol_with_h, params)
+            
+            # Optimize the structure with MMFF94 force field
+            AllChem.MMFFOptimizeMolecule(mol_with_h)
+            
+            # Get XYZ coordinates
+            xyz_block = Chem.MolToXYZBlock(mol_with_h)
+            # Remove the header lines (atom count and comment)
+            xyz_coords = "\n".join(xyz_block.strip().split('\n')[2:])
+            
+            self.coordinates_input.setPlainText(xyz_coords)
+            logging.info(f"Successfully generated structure for SMILES: {smiles}")
+
+        except Exception as e:
+            error_msg = f"Failed to generate structure: {e}"
+            logging.error(error_msg)
+            QMessageBox.critical(self, "Error", error_msg)
+            self.mol_image_label.setText("Error generating depiction.")
+            self.coordinates_input.clear()
+
+    def _browse_for_orca(self):
+        executable_filter = "ORCA Executable (orca.exe)" if sys.platform == "win32" else "ORCA Executable (orca)"
+        path, _ = QFileDialog.getOpenFileName(self, "Select ORCA Executable", "", executable_filter)
+        if path:
+            self.orca_path_input.setText(path)
+
+    def _browse_for_input_file(self):
+        path, _ = QFileDialog.getSaveFileName(self, "Save ORCA Input File", "", "ORCA Input Files (*.inp);;All Files (*)")
+        if path:
+            self.input_file_path_input.setText(path)
+            # Automatically set the output file path
+            output_path = os.path.splitext(path)[0] + ".out"
+            self.output_file_path_input.setText(output_path)
+
+    def _browse_for_output_file(self):
+        path, _ = QFileDialog.getSaveFileName(self, "Save ORCA Output File", "", "ORCA Output Files (*.out);;All Files (*)")
+        if path:
+            self.output_file_path_input.setText(path)
 
     def _save_and_submit(self):
         # First, ensure the input is generated
-        self._generate_input()
-        generated_input = self.output_text.toPlainText()
-
-        if not generated_input:
-            QMessageBox.warning(self, "Warning", "No input file generated.")
+        if not self.output_text.toPlainText().strip():
+            QMessageBox.warning(self, "Warning", "Please generate the input file first.")
             return
 
-        # Open file dialog to save the input file
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save ORCA Input File",
-            "",
-            "ORCA Input Files (*.inp);;All Files (*)",
-        )
+        # Get ORCA path
+        orca_path = self.orca_path_input.text()
+        if not orca_path or not os.path.exists(orca_path):
+            QMessageBox.warning(self, "ORCA Path Error", "Please provide a valid path to the ORCA executable.")
+            return
 
-        if file_path:
-            try:
-                with open(file_path, "w") as f:
-                    f.write(generated_input)
+        # Get the input and output file paths
+        input_filename = self.input_file_path_input.text().strip()
+        output_filename = self.output_file_path_input.text().strip()
 
-                # Ask user if they want to submit the job
-                reply = QMessageBox.question(self, 'Submit Job',
-                                           'Do you want to submit this job to ORCA?',
-                                           QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                                           QMessageBox.StandardButton.No)
+        if not input_filename or not output_filename:
+            QMessageBox.warning(self, "Input Error", "Please specify both input and output file paths.")
+            return
+        try:
+            with open(input_filename, 'w') as f:
+                f.write(self.output_text.toPlainText())
+        except Exception as e:
+            QMessageBox.critical(self, "File Error", f"Failed to save input file: {e}")
+            return
 
-                if reply == QMessageBox.StandardButton.Yes:
-                    self.submitter.submit(file_path)
-                    QMessageBox.information(self, "Success", f"Job submitted for file: {file_path}")
-                else:
-                    QMessageBox.information(self, "Info", f"Input file saved to {file_path}. Job not submitted.")
-
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"An error occurred: {e}")
+        # Run the ORCA calculation
+        try:
+            logging.info(f"Starting ORCA calculation: {orca_path} {input_filename}")
+            with open(output_filename, 'w') as outfile:
+                # Use Popen for non-blocking execution
+                process = subprocess.Popen(
+                    [orca_path, input_filename],
+                    stdout=outfile,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+                )
+            self.orca_process = process # Store for potential future management
+            QMessageBox.information(self, "Submission Successful", 
+                                    f"ORCA calculation has been started.\n"
+                                    f"Output will be written to {output_filename}")
+        except Exception as e:
+            QMessageBox.critical(self, "Submission Error", f"Failed to start ORCA process: {e}")
 
     def _create_menu(self):
         menu_bar = self.menuBar()

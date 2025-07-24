@@ -1,6 +1,6 @@
 import sys
 import os
-from PyQt6.QtCore import QSettings
+from PyQt6.QtCore import QSettings, Qt
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -31,6 +31,7 @@ import subprocess
 from .input_generator import OrcaInputGenerator
 from .job_submitter import JobSubmitter
 from .syntax_highlighter import OrcaSyntaxHighlighter
+from .viewer_3d import MoleculeViewer3D
 
 
 logging.basicConfig(level=logging.INFO)
@@ -200,15 +201,23 @@ class MainWindow(QMainWindow):
 
         # 2D depiction view
         self.mol_image_label = QLabel("2D depiction will be shown here.")
-        self.mol_image_label.setMinimumSize(400, 300)
+        self.mol_image_label.setFixedSize(300, 300)
         self.mol_image_label.setStyleSheet("border: 1px solid grey; padding: 5px;")
+        self.mol_image_label.setScaledContents(True)
         coords_layout.addRow("2D Depiction:", self.mol_image_label)
 
         # Coordinates output
         self.coordinates_input = QTextEdit()
         self.coordinates_input.setReadOnly(True)
         self.coordinates_input.setPlaceholderText("Generated 3D coordinates will appear here...")
-        coords_layout.addRow("3D Coordinates (XYZ):", self.coordinates_input)
+        # 3D Coordinates with View button
+        coords_header_layout = QHBoxLayout()
+        coords_header_layout.addWidget(QLabel("3D Coordinates:"))
+        coords_header_layout.addStretch()
+        self.view_3d_button = QPushButton("View 3D")
+        coords_header_layout.addWidget(self.view_3d_button)
+        coords_layout.addRow(coords_header_layout)
+        coords_layout.addRow(self.coordinates_input)
         
         self.layout.addLayout(coords_layout)
 
@@ -268,6 +277,7 @@ class MainWindow(QMainWindow):
         self.save_button.clicked.connect(self._save_and_submit)
         self.input_file_browse_button.clicked.connect(self._browse_for_input_file)
         self.output_file_browse_button.clicked.connect(self._browse_for_output_file)
+        self.view_3d_button.clicked.connect(self._open_3d_viewer)
 
     def _update_ui_for_method(self, method):
         is_dft = method == "DFT"
@@ -413,7 +423,7 @@ class MainWindow(QMainWindow):
 
             # --- Generate 2D Depiction by saving to a temporary file ---
             temp_img_file = "_temp_mol.png"
-            Draw.MolToFile(mol, temp_img_file, size=(400, 300))
+            Draw.MolToFile(mol, temp_img_file, size=(300, 300))
             pixmap = QPixmap(temp_img_file)
             self.mol_image_label.setPixmap(pixmap)
             # Clean up the temporary file
@@ -463,6 +473,31 @@ class MainWindow(QMainWindow):
         path, _ = QFileDialog.getSaveFileName(self, "Save ORCA Output File", "", "ORCA Output Files (*.out);;All Files (*)")
         if path:
             self.output_file_path_input.setText(path)
+
+    def _open_3d_viewer(self):
+        coords_text = self.coordinates_input.toPlainText().strip()
+        if not coords_text:
+            QMessageBox.warning(self, "Input Error", "No coordinates to display. Please generate a structure first.")
+            return
+
+        coordinates = []
+        for line in coords_text.split('\n'):
+            parts = line.split()
+            if len(parts) == 4:
+                try:
+                    atom = parts[0]
+                    x, y, z = map(float, parts[1:])
+                    coordinates.append([atom, x, y, z])
+                except (ValueError, IndexError):
+                    QMessageBox.warning(self, "Coordinate Error", f"Could not parse coordinate line: {line}")
+                    return
+            
+        if coordinates:
+            # Create a new viewer instance each time to prevent rendering issues.
+            # It is not stored as a member variable because WA_DeleteOnClose handles its lifecycle.
+            viewer = MoleculeViewer3D(coordinates, parent=self)
+            viewer.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+            viewer.show()
 
     def _save_and_submit(self):
         # First, ensure the input is generated

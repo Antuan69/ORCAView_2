@@ -1,5 +1,16 @@
 # ORCAView
 
+---
+
+### July 2025 Update
+- **Robust Windows Job Cancellation:** Cancelling a job now kills all ORCA-related processes (orca.exe, MPI, children) using native Windows process tree termination.
+- **Batch Queue Stability:** The batch job queue is fully automatic—jobs start immediately after submission, and the UI remains responsive.
+- **No PyVista Dependency:** The 3D viewer is now Vispy-only. PyVista is no longer required or supported.
+- **requirements.txt is current** and matches all features.
+- **All jobs are launched via batch files** for maximum compatibility with Windows and ORCA's official recommendations.
+
+---
+
 ORCAView is a powerful PyQt6 desktop application for molecular visualization, editing, and automated ORCA quantum chemistry job submission with advanced batch queue management.
 
 ## Features

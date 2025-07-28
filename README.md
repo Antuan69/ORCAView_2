@@ -1,5 +1,39 @@
 # ORCAView
 
+ORCAView is a molecular viewer application that allows users to visualize molecules in 2D and 3D. It features an integration with the Ketcher molecular editor for easy structure drawing and a 3D viewer powered by Vispy for high-quality rendering.
+
+## Features
+
+- **Ketcher Integration**: Draw and edit molecules using the powerful Ketcher web-based editor embedded within the application.
+- **RDKit Backend**: Utilizes RDKit for chemical informatics, including SMILES parsing and 3D coordinate generation.
+- **2D and 3D Visualization**: View molecules in both 2D (as drawn in Ketcher) and interactive 3D.
+- **Advanced 3D Rendering**: The 3D viewer, built with Vispy, now provides seamless tube-style rendering of molecules, with each bond as a lit, smooth tube (cylinder) and perfectly rounded, closed ends using mesh spheres. All caps are lit and shaded for a modern, capsule-like appearance.
+- **PyQt6 GUI**: A modern and responsive graphical user interface built with PyQt6.
+
+## Dependencies
+
+- PyQt6
+- PyQt6-WebEngine
+- Flask
+- numpy < 2.0
+- rdkit-pypi
+- Pygments
+- vispy
+
+## Usage
+
+1. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Run the application:
+   ```bash
+   python main.py
+   ```
+3. Use the Ketcher editor to draw a molecule.
+4. Click "Generate Structure" to create a 3D model from your drawing.
+5. Click "Open 3D Viewer" to see the interactive 3D visualization.
+
 ORCAView is a desktop application built with PyQt6 that provides a graphical user interface (GUI) for generating and submitting quantum chemistry calculations to the ORCA software package.
 
 It simplifies the process of creating ORCA input files by allowing users to generate molecular structures from SMILES strings, customize calculation parameters, and submit jobs directly from the application.

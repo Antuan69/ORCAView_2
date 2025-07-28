@@ -3,6 +3,7 @@
 ---
 
 ### July 2025 Update
+- **Official ORCA 6.1 Basis Sets:** The DFT and HF basis set dropdowns now use grouped, deduplicated lists directly from the ORCA 6.1 manual (Karlsruhe def2, Ahlrichs, Pople, etc.) for full compliance and user clarity.
 - **Robust Windows Job Cancellation:** Cancelling a job now kills all ORCA-related processes (orca.exe, MPI, children) using native Windows process tree termination.
 - **Batch Queue Stability:** The batch job queue is fully automatic—jobs start immediately after submission, and the UI remains responsive.
 - **No PyVista Dependency:** The 3D viewer is now Vispy-only. PyVista is no longer required or supported.
@@ -19,6 +20,7 @@ ORCAView is a powerful PyQt6 desktop application for molecular visualization, ed
 - **RDKit Backend**: SMILES parsing, 3D coordinate generation, and pre-optimization.
 - **2D and 3D Visualization**: View molecules in 2D and interactive 3D.
 - **Advanced 3D Rendering**: Vispy-based viewer with smooth tube/cylinder bonds and rounded, lit end-caps (no PyVista required).
+- **Official Basis Set Dropdowns**: DFT and HF basis set selectors now present all official ORCA 6.1 basis sets, grouped by family (Karlsruhe def2, Ahlrichs, Pople, etc.) for clarity and accuracy.
 - **Batch Job Queue System**: Queue multiple ORCA jobs for sequential execution. Jobs are launched via robust Windows batch files for maximum compatibility.
 - **Queue UI Controls**: View queued, running, and completed jobs. Cancel or reorder jobs interactively from the GUI.
 - **Full Logging and Diagnostics**: All job launches and errors are logged for easy troubleshooting.

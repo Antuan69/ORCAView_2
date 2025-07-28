@@ -5,4 +5,3 @@ numpy<2.0
 rdkit-pypi
 Pygments
 vispy
-# pyvista removed (no longer used)

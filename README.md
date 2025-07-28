@@ -22,6 +22,7 @@ ORCAView is a molecular viewer application that allows users to visualize molecu
 
 ## Usage
 
+### Application
 1. Install the required dependencies:
    ```bash
    pip install -r requirements.txt
@@ -33,6 +34,26 @@ ORCAView is a molecular viewer application that allows users to visualize molecu
 3. Use the Ketcher editor to draw a molecule.
 4. Click "Generate Structure" to create a 3D model from your drawing.
 5. Click "Open 3D Viewer" to see the interactive 3D visualization.
+
+### Standalone Debug Viewer
+For standalone 3D molecule debugging (PyVista-based):
+```bash
+python debug_viewer.py
+```
+This will open a separate window for visualizing a test molecule using PyVista.
+
+### ORCA Job Submission (Windows)
+- ORCA jobs are submitted via a temporary batch file for robust Windows compatibility.
+- The batch file uses full Windows paths and output redirection:
+  ```
+  C:\path\to\orca.exe C:\path\to\input.inp > C:\path\to\output.out
+  ```
+- The input generator writes ORCA input files with correct block formatting (no 'end' for %maxcore, all other blocks closed properly).
+
+### Troubleshooting
+- If ORCA jobs do not start, check the generated batch file and try running it manually.
+- Ensure all paths use backslashes and that %maxcore block does not have 'end'.
+- See the application's log for detailed diagnostics.
 
 ORCAView is a desktop application built with PyQt6 that provides a graphical user interface (GUI) for generating and submitting quantum chemistry calculations to the ORCA software package.
 

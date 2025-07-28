@@ -53,6 +53,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.central_widget)
         self.layout = QVBoxLayout(self.central_widget)
 
+        self.current_molecule = None
+
         self._create_main_tabs()
         self._create_job_type_tab()
         self._create_method_tab()
@@ -446,6 +448,7 @@ class MainWindow(QMainWindow):
             xyz_coords = "\n".join(xyz_block.strip().split('\n')[2:])
             
             self.coordinates_input.setPlainText(xyz_coords)
+            self.current_molecule = mol_with_h
             logging.info(f"Successfully generated structure for SMILES: {smiles}")
 
         except Exception as e:
@@ -475,29 +478,14 @@ class MainWindow(QMainWindow):
             self.output_file_path_input.setText(path)
 
     def _open_3d_viewer(self):
-        coords_text = self.coordinates_input.toPlainText().strip()
-        if not coords_text:
-            QMessageBox.warning(self, "Input Error", "No coordinates to display. Please generate a structure first.")
-            return
-
-        coordinates = []
-        for line in coords_text.split('\n'):
-            parts = line.split()
-            if len(parts) == 4:
-                try:
-                    atom = parts[0]
-                    x, y, z = map(float, parts[1:])
-                    coordinates.append([atom, x, y, z])
-                except (ValueError, IndexError):
-                    QMessageBox.warning(self, "Coordinate Error", f"Could not parse coordinate line: {line}")
-                    return
-            
-        if coordinates:
+        if self.current_molecule:
             # Create a new viewer instance each time to prevent rendering issues.
-            # It is not stored as a member variable because WA_DeleteOnClose handles its lifecycle.
-            viewer = MoleculeViewer3D(coordinates, parent=self)
-            viewer.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
-            viewer.show()
+            # Storing it as a member variable prevents it from being garbage collected.
+            self.viewer_3d_window = MoleculeViewer3D(self.current_molecule)
+            self.viewer_3d_window.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+            self.viewer_3d_window.show()
+        else:
+            QMessageBox.warning(self, "Structure Error", "No structure has been generated yet.")
 
     def _save_and_submit(self):
         # First, ensure the input is generated
@@ -528,16 +516,74 @@ class MainWindow(QMainWindow):
         # Run the ORCA calculation
         try:
             logging.info(f"Starting ORCA calculation: {orca_path} {input_filename}")
-            with open(output_filename, 'w') as outfile:
-                # Use Popen for non-blocking execution
+            import time
+            input_dir = os.path.dirname(input_filename) or os.getcwd()
+            env = os.environ.copy()
+            orca_dir = os.path.dirname(orca_path)
+            old_path = env.get('PATH', '')
+            env['PATH'] = orca_dir + os.pathsep + old_path
+            logging.info(f"Launching ORCA with cwd={input_dir}")
+            logging.info(f"Environment PATH: {env['PATH']}")
+            try:
+                # Write a temporary .bat file to launch ORCA
+                bat_path = os.path.join(input_dir, "_orca_job.bat")
+                # Ensure all paths use backslashes for Windows batch
+                orca_cmd = f'{orca_path} {input_filename} > {output_filename}'
+                orca_cmd = orca_cmd.replace('/', '\\')
+                with open(bat_path, 'w') as bat_file:
+                    bat_file.write(f"@echo off\n{orca_cmd}\n")
+                logging.info(f"Wrote ORCA launcher batch file: {bat_path}")
+                # Launch the .bat file
                 process = subprocess.Popen(
-                    [orca_path, input_filename],
-                    stdout=outfile,
+                    [bat_path],
+                    stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True,
-                    creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+                    creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
+                    cwd=input_dir,
+                    env=env
                 )
-            self.orca_process = process # Store for potential future management
+                self.orca_process = process
+                time.sleep(1)
+                if process.poll() is not None and process.returncode != 0:
+                    stdout, stderr = process.communicate(timeout=1)
+                    logging.error(f"ORCA failed to start. Command: {[orca_path, input_filename]}")
+                    logging.error(f"stdout: {stdout}")
+                    logging.error(f"stderr: {stderr}")
+                    # Try fallback with shell=True
+                    try:
+                        shell_cmd = f'"{orca_path}" "{input_filename}"'
+                        logging.info(f"Retrying with shell=True: {shell_cmd}")
+                        process2 = subprocess.Popen(
+                            shell_cmd,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True,
+                            shell=True,
+                            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
+                            cwd=input_dir,
+                            env=env
+                        )
+                        self.orca_process = process2
+                        time.sleep(1)
+                        if process2.poll() is not None and process2.returncode != 0:
+                            stdout2, stderr2 = process2.communicate(timeout=1)
+                            logging.error(f"Shell launch failed. stdout: {stdout2}")
+                            logging.error(f"Shell launch failed. stderr: {stderr2}")
+                            QMessageBox.critical(self, "ORCA Launch Error", f"ORCA failed to start or exited immediately (shell fallback).\n\nStdout:\n{stdout2}\n\nStderr:\n{stderr2}")
+                            return
+                        else:
+                            QMessageBox.information(self, "Submission Successful (Shell Fallback)", f"ORCA calculation has been started using shell fallback.\nOutput will be written to {output_filename}")
+                            return
+                    except Exception as e2:
+                        QMessageBox.critical(self, "ORCA Shell Launch Error", f"Shell fallback also failed: {e2}\n\nStdout:\n{stdout}\n\nStderr:\n{stderr}")
+                        return
+                    # End shell fallback
+                    return
+            except Exception as e:
+                QMessageBox.critical(self, "ORCA Submission Error", f"Failed to start ORCA process: {e}")
+                return
+
             QMessageBox.information(self, "Submission Successful", 
                                     f"ORCA calculation has been started.\n"
                                     f"Output will be written to {output_filename}")

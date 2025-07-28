@@ -106,14 +106,19 @@ class OrcaInputGenerator:
             input_lines.append("")  # Add empty line before each block
             input_lines.append(f"%{block_name}")
             input_lines.append(block_content)
-            input_lines.append("end")
+            if block_name.strip().lower() != "maxcore":
+                input_lines.append("end")
 
 
-        # Add coordinates
+        # Always ensure a blank line before the coordinate block
+        if input_lines and input_lines[-1].strip() != '':
+            input_lines.append("")
         input_lines.append(f"* xyz {self.charge} {self.multiplicity}")
         for atom in self.coordinates:
             line = f"  {atom[0]:<2} {atom[1]:>12.6f} {atom[2]:>12.6f} {atom[3]:>12.6f}"
             input_lines.append(line)
         input_lines.append("*")
 
-        return "\n".join(input_lines)
+        # Join and strip any trailing blank lines
+        result = "\n".join(input_lines).rstrip() + "\n"
+        return result

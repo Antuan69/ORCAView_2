@@ -1,143 +1,12 @@
-import sys
-import os
-from PyQt6.QtCore import QSettings, Qt
-from PyQt6.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QFormLayout,
-    QLineEdit,
-    QPushButton,
-    QTextEdit,
-    QComboBox,
-    QLabel,
-    QSpinBox,
-    QTabWidget,
-    QStackedWidget,
-    QFileDialog,
-    QMessageBox
-)
-from PyQt6.QtGui import QFont
-from PyQt6.QtGui import QPixmap
-from rdkit import Chem
-from rdkit.Chem import Draw, AllChem
-import json
-import os
-import logging
-import subprocess
-
-from .input_generator import OrcaInputGenerator
-from .job_submitter import JobSubmitter
-from .syntax_highlighter import OrcaSyntaxHighlighter
-from .viewer_3d import MoleculeViewer3D
-
-
-logging.basicConfig(level=logging.INFO)
-
-
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("ORCAView - UI Redesign")
-        self.setGeometry(100, 100, 800, 600)
-        self.settings = QSettings("MyCompany", "ORCAView")
-
-        # Phase 1: Initialize all data structures first
-        self._initialize_data()
-
-        # Phase 2: Create UI components in a structured way
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        self.layout = QVBoxLayout(self.central_widget)
-
-        self.current_molecule = None
-
-        self._create_main_tabs()
-        self._create_job_type_tab()
-        self._create_method_tab()
-        self._create_solvation_tab()
-        self._create_advanced_options_section()
-        self._create_coordinates_section()
-        self._create_submission_section()
-        self._create_menu()
-
-        # Phase 3: Initialize backend components
-        self._initialize_backend()
-
-        # Phase 4: Connect signals and set initial UI state
-        self._connect_signals()
-        self._update_ui_for_method(self.method_combo.currentText())
-
-    def _initialize_data(self):
-        """Defines all data dictionaries needed for the UI, preventing startup crashes."""
-        self.job_types = {
-            "Single Point": "SP", "Geometry Optimization": "Opt", "Frequency Analysis": "Freq",
-            "Transition State Search": "OptTS", "Composite Methods": "", "NEB": "NEB", "IRC": "IRC"
-        }
-        self.methods = ["DFT", "HF", "Semi-Empirical", "xTB"]
-        self.dft_functionals = {
-            "Hybrid": ["B3LYP", "PBE0", "TPSSh", "HSE06", "CAM-B3LYP", "wB97X-D3"],
-            "GGA": ["BP86", "PBE", "revPBE", "B97-D3"],
-            "Meta-GGA": ["TPSS", "revTPSS", "M06-L", "SCAN"],
-            "Double-Hybrid": ["B2PLYP", "DSD-PBEP86-D3"]
-        }
-        self.basis_sets = {
-            "Pople": ["6-31G(d)", "6-311G(d,p)", "6-311++G(2d,2p)"],
-            "Dunning": ["cc-pVDZ", "aug-cc-pVDZ", "cc-pVTZ", "aug-cc-pVTZ"],
-            "Karlsruhe": ["def2-SVP", "def2-TZVP", "def2-QZVP"]
-        }
-        self.semiempirical_methods = {
-            "AM1": "AM1", "PM3": "PM3", "MNDO": "MNDO", "OM3": "OM3", "PM7": "PM7", "GFN2-xTB": "GFN2-xTB"
-        }
-        self.xtb_methods = {"GFN1-xTB": "GFN1-xTB", "GFN2-xTB": "GFN2-xTB"}
-        self.solvation_models = {
-            "xTB": ["None", "ALPB", "DDCOSMO", "CPCMX"],
-            "Other": ["None", "CPCM", "SMD"]
-        }
-        self.solvents_by_model = {
-            "ALPB": ["Acetone", "Acetonitrile", "H2O", "Hexane", "Methanol", "Toluene"],
-            "DDCOSMO": ["acetone", "acetonitrile", "h2o", "hexane", "methanol", "toluene"],
-            "CPCMX": ["Acetonitrile", "DMSO", "H2O", "Methanol", "THF"],
-            "CPCM": ["acetone", "acetonitrile", "benzene", "ch2cl2", "dmso", "h2o", "hexane", "methanol"],
-            "SMD": ["water", "acetonitrile", "methanol", "ethanol", "chloroform", "benzene", "toluene", "dmso"]
-        }
-
-    def _create_main_tabs(self):
-        self.tabs = QTabWidget()
-        self.layout.addWidget(self.tabs)
-
-    def _create_job_type_tab(self):
-        self.job_tab = QWidget()
-        layout = QFormLayout(self.job_tab)
-        self.job_type_combo = QComboBox()
-        self.job_type_combo.addItems(self.job_types.keys())
-        layout.addRow("Job Type:", self.job_type_combo)
-        self.tabs.addTab(self.job_tab, "Job Type")
-
-    def _create_method_tab(self):
-        self.method_tab = QWidget()
-        layout = QFormLayout(self.method_tab)
-        self.method_combo = QComboBox()
-        self.method_combo.addItems(self.methods)
-        layout.addRow("Method:", self.method_combo)
-
-        self.method_stack = QStackedWidget()
-        layout.addRow(self.method_stack)
-
-        # Pane 0: DFT/HF
-        self.dft_hf_pane = QWidget()
-        self.dft_hf_layout = QFormLayout(self.dft_hf_pane)
-        self.dft_functional_combo = QComboBox()
-        for group, items in self.dft_functionals.items():
-            self.dft_functional_combo.addItem(f"-- {group} --")
-            self.dft_functional_combo.addItems(items)
-        self.basis_set_combo = QComboBox()
-        for group, items in self.basis_sets.items():
-            self.basis_set_combo.addItem(f"-- {group} --")
-            self.basis_set_combo.addItems(items)
+"""
+This file is now a stub. All MainWindow logic has been moved to main_window.py.
+To launch the application, import MainWindow from this module.
+"""
+"""
+This file is now a stub. All MainWindow logic has been moved to main_window.py.
+To launch the application, import MainWindow from this module.
+"""
+from .main_window import MainWindow
         self.dft_hf_layout.addRow("DFT Functional:", self.dft_functional_combo)
         self.dft_hf_layout.addRow("Basis Set:", self.basis_set_combo)
         self.method_stack.addWidget(self.dft_hf_pane)
@@ -493,19 +362,17 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Warning", "Please generate the input file first.")
             return
 
-        # Get ORCA path
-        orca_path = self.orca_path_input.text()
-        if not orca_path or not os.path.exists(orca_path):
-            QMessageBox.warning(self, "ORCA Path Error", "Please provide a valid path to the ORCA executable.")
+        orca_path = self.orca_path_input.text().strip()
+        if not orca_path or not os.path.isfile(orca_path):
+            QMessageBox.warning(self, "Input Error", "Please specify a valid ORCA executable path.")
             return
 
         # Get the input and output file paths
         input_filename = self.input_file_path_input.text().strip()
         output_filename = self.output_file_path_input.text().strip()
 
-        if not input_filename or not output_filename:
-            QMessageBox.warning(self, "Input Error", "Please specify both input and output file paths.")
-            return
+        # ... (other code)
+
         try:
             with open(input_filename, 'w') as f:
                 f.write(self.output_text.toPlainText())
@@ -513,88 +380,32 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "File Error", f"Failed to save input file: {e}")
             return
 
-        # Run the ORCA calculation
+        # Write a temporary .bat file to launch ORCA
+        import time
+        input_dir = os.path.dirname(input_filename) or os.getcwd()
+        bat_path = os.path.join(input_dir, f"_orca_job_{int(time.time())}.bat")
+        orca_cmd = f'{orca_path} {input_filename} > {output_filename}'
+        orca_cmd = orca_cmd.replace('/', '\\')
         try:
-            logging.info(f"Starting ORCA calculation: {orca_path} {input_filename}")
-            import time
-            input_dir = os.path.dirname(input_filename) or os.getcwd()
-            env = os.environ.copy()
-            orca_dir = os.path.dirname(orca_path)
-            old_path = env.get('PATH', '')
-            env['PATH'] = orca_dir + os.pathsep + old_path
-            logging.info(f"Launching ORCA with cwd={input_dir}")
-            logging.info(f"Environment PATH: {env['PATH']}")
-            try:
-                # Write a temporary .bat file to launch ORCA
-                bat_path = os.path.join(input_dir, "_orca_job.bat")
-                # Ensure all paths use backslashes for Windows batch
-                orca_cmd = f'{orca_path} {input_filename} > {output_filename}'
-                orca_cmd = orca_cmd.replace('/', '\\')
-                with open(bat_path, 'w') as bat_file:
-                    bat_file.write(f"@echo off\n{orca_cmd}\n")
-                logging.info(f"Wrote ORCA launcher batch file: {bat_path}")
-                # Launch the .bat file
-                process = subprocess.Popen(
-                    [bat_path],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
-                    cwd=input_dir,
-                    env=env
-                )
-                self.orca_process = process
-                time.sleep(1)
-                if process.poll() is not None and process.returncode != 0:
-                    stdout, stderr = process.communicate(timeout=1)
-                    logging.error(f"ORCA failed to start. Command: {[orca_path, input_filename]}")
-                    logging.error(f"stdout: {stdout}")
-                    logging.error(f"stderr: {stderr}")
-                    # Try fallback with shell=True
-                    try:
-                        shell_cmd = f'"{orca_path}" "{input_filename}"'
-                        logging.info(f"Retrying with shell=True: {shell_cmd}")
-                        process2 = subprocess.Popen(
-                            shell_cmd,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            text=True,
-                            shell=True,
-                            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
-                            cwd=input_dir,
-                            env=env
-                        )
-                        self.orca_process = process2
-                        time.sleep(1)
-                        if process2.poll() is not None and process2.returncode != 0:
-                            stdout2, stderr2 = process2.communicate(timeout=1)
-                            logging.error(f"Shell launch failed. stdout: {stdout2}")
-                            logging.error(f"Shell launch failed. stderr: {stderr2}")
-                            QMessageBox.critical(self, "ORCA Launch Error", f"ORCA failed to start or exited immediately (shell fallback).\n\nStdout:\n{stdout2}\n\nStderr:\n{stderr2}")
-                            return
-                        else:
-                            QMessageBox.information(self, "Submission Successful (Shell Fallback)", f"ORCA calculation has been started using shell fallback.\nOutput will be written to {output_filename}")
-                            return
-                    except Exception as e2:
-                        QMessageBox.critical(self, "ORCA Shell Launch Error", f"Shell fallback also failed: {e2}\n\nStdout:\n{stdout}\n\nStderr:\n{stderr}")
-                        return
-                    # End shell fallback
-                    return
-            except Exception as e:
-                QMessageBox.critical(self, "ORCA Submission Error", f"Failed to start ORCA process: {e}")
-                return
-
-            QMessageBox.information(self, "Submission Successful", 
-                                    f"ORCA calculation has been started.\n"
-                                    f"Output will be written to {output_filename}")
+            with open(bat_path, 'w') as bat_file:
+                bat_file.write(f"@echo off\n{orca_cmd}\n")
         except Exception as e:
-            QMessageBox.critical(self, "Submission Error", f"Failed to start ORCA process: {e}")
+            QMessageBox.critical(self, "Batch File Error", f"Failed to write batch file: {e}")
+            return
+
+        # Enqueue the job
+        job = OrcaJob(input_filename, output_filename, bat_path, orca_path)
+        self.job_queue_manager.add_job(job)
+        QMessageBox.information(self, "Job Queued", f"Job has been added to the queue. It will run automatically when previous jobs finish.")
+
+    def _refresh_job_queue_tab(self):
+        self.job_queue_tab.refresh()
 
     def _create_menu(self):
         menu_bar = self.menuBar()
         settings_menu = menu_bar.addMenu("&Settings")
         set_orca_path_action = settings_menu.addAction("Set ORCA Path")
-        set_orca_path_action.triggered.connect(self._set_orca_path)
+        # ... (other menu creation code)
 
     def _set_orca_path(self):
         file_path, _ = QFileDialog.getOpenFileName(

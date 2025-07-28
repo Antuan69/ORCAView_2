@@ -137,6 +137,7 @@ class JobQueueManager:
                                 job.status = JobStatus.CANCELLED
                                 job.finished_time = time.strftime('%Y-%m-%d %H:%M:%S')
                                 print('JOB CANCELLED:', job.input_path)
+                                self._trigger_update()
                                 break
                         if job.process.poll() is not None:
                             break
@@ -196,8 +197,14 @@ class JobQueueManager:
         self.worker_thread.join()
 
     def _trigger_update(self):
-        if self.on_update_callback:
-            self.on_update_callback()
+        # Always schedule the UI update in the main thread
+        try:
+            from PyQt6.QtCore import QTimer
+            QTimer.singleShot(0, self.on_update_callback)
+        except Exception:
+            # fallback for non-GUI/early init
+            if self.on_update_callback:
+                self.on_update_callback()
 
     def get_all_jobs(self):
         with self.lock:

@@ -1,6 +1,6 @@
 import sys
 from PyQt6.QtWidgets import QApplication
-from orcaview.gui import MainWindow
+from orcaview.main_window import MainWindow
 
 def main():
     """Main function to start the ORCAView application."""

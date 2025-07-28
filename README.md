@@ -1,14 +1,16 @@
 # ORCAView
 
-ORCAView is a molecular viewer application that allows users to visualize molecules in 2D and 3D. It features an integration with the Ketcher molecular editor for easy structure drawing and a 3D viewer powered by Vispy for high-quality rendering.
+ORCAView is a powerful PyQt6 desktop application for molecular visualization, editing, and automated ORCA quantum chemistry job submission with advanced batch queue management.
 
 ## Features
 
-- **Ketcher Integration**: Draw and edit molecules using the powerful Ketcher web-based editor embedded within the application.
-- **RDKit Backend**: Utilizes RDKit for chemical informatics, including SMILES parsing and 3D coordinate generation.
-- **2D and 3D Visualization**: View molecules in both 2D (as drawn in Ketcher) and interactive 3D.
-- **Advanced 3D Rendering**: The 3D viewer, built with Vispy, now provides seamless tube-style rendering of molecules, with each bond as a lit, smooth tube (cylinder) and perfectly rounded, closed ends using mesh spheres. All caps are lit and shaded for a modern, capsule-like appearance.
-- **PyQt6 GUI**: A modern and responsive graphical user interface built with PyQt6.
+- **Ketcher Integration**: Draw and edit molecules using the Ketcher web-based editor embedded in the app.
+- **RDKit Backend**: SMILES parsing, 3D coordinate generation, and pre-optimization.
+- **2D and 3D Visualization**: View molecules in 2D and interactive 3D.
+- **Advanced 3D Rendering**: Vispy-based viewer with smooth tube/cylinder bonds and rounded, lit end-caps (no PyVista required).
+- **Batch Job Queue System**: Queue multiple ORCA jobs for sequential execution. Jobs are launched via robust Windows batch files for maximum compatibility.
+- **Queue UI Controls**: View queued, running, and completed jobs. Cancel or reorder jobs interactively from the GUI.
+- **Full Logging and Diagnostics**: All job launches and errors are logged for easy troubleshooting.
 
 ## Dependencies
 
@@ -23,7 +25,7 @@ ORCAView is a molecular viewer application that allows users to visualize molecu
 ## Usage
 
 ### Application
-1. Install the required dependencies:
+1. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
@@ -31,33 +33,35 @@ ORCAView is a molecular viewer application that allows users to visualize molecu
    ```bash
    python main.py
    ```
-3. Use the Ketcher editor to draw a molecule.
-4. Click "Generate Structure" to create a 3D model from your drawing.
-5. Click "Open 3D Viewer" to see the interactive 3D visualization.
-
-### Standalone Debug Viewer
-For standalone 3D molecule debugging (PyVista-based):
-```bash
-python debug_viewer.py
-```
-This will open a separate window for visualizing a test molecule using PyVista.
+3. Use the Ketcher editor to draw a molecule and generate a 3D structure.
+4. Submit ORCA jobs via the GUI. Jobs are queued and processed one-by-one.
+5. Monitor job progress, cancel, or reorder jobs in the "Job Queue" tab.
 
 ### ORCA Job Submission (Windows)
-- ORCA jobs are submitted via a temporary batch file for robust Windows compatibility.
-- The batch file uses full Windows paths and output redirection:
-  ```
-  C:\path\to\orca.exe C:\path\to\input.inp > C:\path\to\output.out
-  ```
-- The input generator writes ORCA input files with correct block formatting (no 'end' for %maxcore, all other blocks closed properly).
+- Jobs are submitted by generating a temporary batch file that launches ORCA with the correct environment and working directory.
+- All paths use Windows backslashes for compatibility.
+- Input files are generated with correct ORCA block formatting (no 'end' for %maxcore; all other blocks properly closed).
 
 ### Troubleshooting
-- If ORCA jobs do not start, check the generated batch file and try running it manually.
-- Ensure all paths use backslashes and that %maxcore block does not have 'end'.
-- See the application's log for detailed diagnostics.
+- If a job fails:
+  - Check the job's output and error logs in the GUI or in the output files.
+  - Common errors include input geometry mismatches (see below).
+  - Try running the generated batch file manually to isolate environment issues.
+- If the UI does not update after a job finishes, switch tabs or submit a new job to refresh.
 
-ORCAView is a desktop application built with PyQt6 that provides a graphical user interface (GUI) for generating and submitting quantum chemistry calculations to the ORCA software package.
+### Advanced Usage & Known Issues
+- **Input Geometry Mismatch**: If you see errors like `Input geometry does not match current geometry`, ensure you are not referencing restart files or old `.gbw` files. Delete old scratch/restart files before rerunning.
+- **Queue Robustness**: The batch queue system is thread-safe and will not deadlock the UI. All job processing is handled in a background thread.
+- **No PyVista**: The 3D viewer is now fully Vispy-based. PyVista is no longer required or supported.
 
-It simplifies the process of creating ORCA input files by allowing users to generate molecular structures from SMILES strings, customize calculation parameters, and submit jobs directly from the application.
+## Contribution & Development
+- All source code is in the `orcaview` directory.
+- Requirements are listed in `requirements.txt`.
+- For bug reports or feature requests, open an issue or pull request on GitHub.
+
+---
+
+ORCAView is a modern, user-friendly interface for quantum chemistry workflows, making it easy to go from drawn molecule to completed ORCA calculation, with full batch automation and diagnostics.
 
 ## Features
 

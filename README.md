@@ -61,27 +61,7 @@ A portable, folder-based distribution can be created using the included PyInstal
 
 3.  The complete, portable application will be located in the `dist/ORCAView` directory.
 
-A modern GUI for the ORCA quantum chemistry package, designed to simplify the process of creating, submitting, and monitoring ORCA calculations.
-
-## Features
-
-- **Intuitive GUI**: A user-friendly interface built with PyQt6 for setting up calculations.
-- **Integrated 3D Molecule Viewer**: Visualize molecules in 3D with a powerful viewer built on Vispy.
-- **Advanced Job Queue**: Manage multiple calculations with a built-in job queue that supports submission, cancellation, and live output monitoring.
-- **Structured Input Generation**: Automatically generates ORCA input files based on user selections, reducing syntax errors.
-- **Portable Build**: Packaged with PyInstaller for easy distribution and use on Windows without requiring a Python installation.
-
-## Usage
-
-1.  Launch `ORCAView.exe`.
-2.  Configure your calculation using the tabs for Method, Solvation, etc.
-3.  Click 'Save and Submit' to add the job to the queue and start the calculation.
-4.  Monitor job progress in the 'Job Queue' tab.
-
-
----
-
-### July 2025 Update
-- **Official ORCA 6.1 Basis Sets:** The DFT and HF basis set dropdowns now use grouped, deduplicated lists directly from the ORCA 6.1 manual (Karlsruhe def2, Ahlrichs, Pople, etc.) for full compliance and user clarity.
+## July 2025 Update
+- **Official ORCA 6.1 Solvent & Basis Set Support:** The solvent lists for CPCM and SMD, and the basis set dropdowns for DFT and HF, now use the official, comprehensive lists from the ORCA 6.1 manual for full compliance and user clarity.
 - **Robust Windows Job Cancellation:** Cancelling a job now kills all ORCA-related processes (orca.exe, MPI, children) using native Windows process tree termination.
 - **Batch Queue Stability:** The batch job queue is fully automatic—jobs start immediately after submission, and the UI remains responsive.

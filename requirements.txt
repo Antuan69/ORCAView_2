@@ -1,7 +1,14 @@
+# Core GUI and Web Engine
 PyQt6
 PyQt6-WebEngine
-Flask
-numpy<2.0
-rdkit-pypi
-Pygments
+
+# 3D Visualization
 vispy
+
+# Backend and Chemistry
+Flask
+rdkit-pypi
+numpy<2.0
+
+# Utilities
+Pygments

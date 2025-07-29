@@ -1,5 +1,23 @@
 # ORCAView
 
+A modern GUI for the ORCA quantum chemistry package, designed to simplify the process of creating, submitting, and monitoring ORCA calculations.
+
+## Features
+
+- **Intuitive GUI**: A user-friendly interface built with PyQt6 for setting up calculations.
+- **Integrated 3D Molecule Viewer**: Visualize molecules in 3D with a powerful viewer built on Vispy.
+- **Advanced Job Queue**: Manage multiple calculations with a built-in job queue that supports submission, cancellation, and live output monitoring.
+- **Structured Input Generation**: Automatically generates ORCA input files based on user selections, reducing syntax errors.
+- **Portable Build**: Packaged with PyInstaller for easy distribution and use on Windows without requiring a Python installation.
+
+## Usage
+
+1.  Launch `ORCAView.exe`.
+2.  Configure your calculation using the tabs for Method, Solvation, etc.
+3.  Click 'Save and Submit' to add the job to the queue and start the calculation.
+4.  Monitor job progress in the 'Job Queue' tab.
+
+
 ---
 
 ### July 2025 Update

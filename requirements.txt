@@ -1,14 +1,15 @@
-# Core GUI and Web Engine
+# Core GUI
 PyQt6
-PyQt6-WebEngine
+
 # 3D Visualization
 vispy
+
 # Chemistry & Molecule Handling
 rdkit-pypi
 numpy<2.0
-# Web Server for Ketcher
-Flask
+
 # Syntax Highlighting
 Pygments
-# Packaging
+
+# Packaging (for creating portable builds)
 pyinstaller

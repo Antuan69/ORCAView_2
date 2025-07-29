@@ -1,12 +1,23 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 
+import os
+import vispy
+
+# Get the path to the vispy package
+vispy_path = os.path.dirname(vispy.__file__)
+
+# Define the data files to be included
+vispy_datas = [
+    (os.path.join(vispy_path, 'glsl'), 'vispy/glsl')
+]
+
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('C:\\Users\\Antonio\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\vispy\\glsl', 'vispy\\glsl'), ('C:\\Users\\Antonio\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\PyQt6\\Qt6\\plugins', 'PyQt6\\Qt6\\plugins'), ('C:\\Users\\Antonio\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\PyQt6\\Qt6\\bin', 'PyQt6\\Qt6\\bin')],
-    hiddenimports=['PyQt6.sip'],
+    datas=vispy_datas,
+    hiddenimports=['vispy.app.backends._pyqt6'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -26,7 +37,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=False,
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,

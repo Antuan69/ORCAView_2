@@ -5,9 +5,7 @@ A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program]
 ## Key Features
 
 - **Intuitive Interface:** A user-friendly GUI built with PyQt6 for setting up a wide range of quantum chemistry calculations.
-- **Integrated 2D/3D Molecule Editor:**
-    - Draw molecules in 2D using the embedded [Ketcher](https://lifescience.opensource.epam.com/ketcher/index.html) editor.
-    - Generate 3D structures from SMILES strings with RDKit-based optimization.
+- **Structure Generation:** Generate 3D structures directly from SMILES strings using the integrated RDKit.
 - **Advanced 3D Molecule Viewer:** A high-performance 3D viewer built with [Vispy](http://vispy.org/) for visualizing molecular structures with ball-and-stick models, lighting, and smooth controls.
 - **Job Queue Management:**
     - Queue up multiple ORCA calculations to run sequentially.
@@ -47,23 +45,29 @@ To run ORCAView from source, follow these steps:
 
 ## Building a Portable Version (Windows)
 
-A portable, folder-based distribution can be created using the included PyInstaller spec file.
+A portable, folder-based distribution can be created using PyInstaller. Due to dependencies on Vispy, the `.spec` file requires modification.
 
 1.  **Install PyInstaller:**
     ```bash
     pip install pyinstaller
     ```
 
-2.  **Run the build script:**
-    From the root of the project directory, run:
+2.  **Generate the initial `.spec` file:**
     ```bash
-    pyinstaller build_portable.spec
+    pyinstaller --name ORCAView --windowed main.py
     ```
 
-3.  The complete, portable application will be located in the `dist/ORCAView` directory.
+3.  **Modify `ORCAView.spec`:**
+    Make the following two changes to the generated `ORCAView.spec` file to ensure Vispy's resources are correctly packaged:
+    - Add `(os.path.join(os.path.dirname(vispy.__file__), 'glsl'), 'vispy/glsl')` to the `datas` list.
+    - Add `'vispy.app.backends._pyqt6'` to the `hiddenimports` list.
 
-## July 2025 Update
-- **Official ORCA 6.1 Solvent & Basis Set Support:** The solvent lists for CPCM and SMD, and the basis set dropdowns for DFT and HF, now use the official, comprehensive lists from the ORCA 6.1 manual for full compliance and user clarity.
-- **Robust Windows Job Cancellation:** Cancelling a job now kills all ORCA-related processes (orca.exe, MPI, children) using native Windows process tree termination.
-- **Batch Queue Stability:** The batch job queue is fully automatic—jobs start immediately after submission, and the UI remains responsive.
-- **Advanced Input Control:** Added a new "Input Blocks" tab that allows users to define custom ORCA input blocks for advanced calculations.
+4.  **Run the build:**
+    From the root of the project directory, run:
+    ```bash
+    pyinstaller ORCAView.spec --noconfirm
+    ```
+
+5.  The complete, portable application will be located in the `dist/ORCAView` directory.
+
+

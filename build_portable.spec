@@ -60,8 +60,8 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='orcaview/icon.ico' # Assuming you have an icon file
 )
+
 coll = COLLECT(
     exe,
     a.binaries,

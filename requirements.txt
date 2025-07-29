@@ -5,10 +5,15 @@ PyQt6-WebEngine
 # 3D Visualization
 vispy
 
-# Backend and Chemistry
-Flask
+# Chemistry & Molecule Handling
 rdkit-pypi
 numpy<2.0
 
-# Utilities
+# Web Server for Ketcher
+Flask
+
+# Syntax Highlighting
 Pygments
+
+# Packaging
+pyinstaller

@@ -19,6 +19,7 @@ from .tabs.solvation_tab import SolvationTab
 from .tabs.advanced_options_tab import AdvancedOptionsTab
 from .tabs.coordinates_tab import CoordinatesTab
 from .tabs.submission_tab import SubmissionTab
+from .tabs.input_blocks_tab import InputBlocksTab
 from .job_queue import JobQueueManager, OrcaJob
 from .job_queue_tab import JobQueueTab
 from .menu import MainMenu
@@ -51,6 +52,7 @@ class MainWindow(QMainWindow):
         self.solvation_tab = SolvationTab()
         self.advanced_options_tab = AdvancedOptionsTab()
         self.coordinates_tab = CoordinatesTab()
+        self.input_blocks_tab = InputBlocksTab()
         self.submission_tab = SubmissionTab(self.settings)
 
         # Ensure solvation models are filtered for the initial method
@@ -64,6 +66,7 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.method_tab, "Method")
         self.tabs.addTab(self.solvation_tab, "Solvation")
         self.tabs.addTab(self.advanced_options_tab, "Advanced")
+        self.tabs.addTab(self.input_blocks_tab, "Input Blocks")
         self.tabs.addTab(self.coordinates_tab, "Coordinates")
         self.tabs.addTab(self.submission_tab, "Submission")
         self.tabs.addTab(self.job_queue_tab, "Job Queue")
@@ -201,6 +204,11 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, "Input Error", "No coordinates provided. Please generate or paste molecular coordinates.")
                 return
             generator.set_coordinates(coordinates)
+            # Add custom input blocks
+            custom_blocks = self.input_blocks_tab.input_blocks
+            for block_name, block_content in custom_blocks.items():
+                generator.add_block(block_name, block_content)
+
             generator.add_block("pal", f"nprocs {nprocs}")
             if memory.isdigit():
                 generator.add_block("maxcore", memory)

@@ -15,6 +15,7 @@ A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program]
     - Cancel running jobs and manage the queue order.
     - View live output files for running calculations.
 - **Flexible Input Generation:** Supports a wide variety of ORCA methods, basis sets, solvation models, and keywords.
+- **Custom Input Blocks:** A dedicated tab to add any of the official ORCA input blocks (%geom, %casscf, etc.) with custom keywords, providing advanced control over the calculation.
 - **Portable Builds:** Includes a PyInstaller script to create a standalone, portable version for Windows.
 
 ## Installation and Usage
@@ -65,3 +66,4 @@ A portable, folder-based distribution can be created using the included PyInstal
 - **Official ORCA 6.1 Solvent & Basis Set Support:** The solvent lists for CPCM and SMD, and the basis set dropdowns for DFT and HF, now use the official, comprehensive lists from the ORCA 6.1 manual for full compliance and user clarity.
 - **Robust Windows Job Cancellation:** Cancelling a job now kills all ORCA-related processes (orca.exe, MPI, children) using native Windows process tree termination.
 - **Batch Queue Stability:** The batch job queue is fully automatic—jobs start immediately after submission, and the UI remains responsive.
+- **Advanced Input Control:** Added a new "Input Blocks" tab that allows users to define custom ORCA input blocks for advanced calculations.

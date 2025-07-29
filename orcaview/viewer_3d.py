@@ -49,7 +49,7 @@ class MoleculeViewer3D(QWidget):
         centroid = atom_positions.mean(axis=0)
         max_extent = np.linalg.norm(atom_positions - centroid, axis=1).max()
 
-        self.view.camera = scene.TurntableCamera(fov=45, azimuth=45, elevation=30, up='z')
+        self.view.camera = scene.ArcballCamera(fov=45)
         self.view.camera.center = centroid
         self.view.camera.distance = max_extent * 3 if max_extent > 0 else 10
 

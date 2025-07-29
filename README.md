@@ -5,8 +5,9 @@ A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program]
 ## Key Features
 
 - **Intuitive Interface:** A user-friendly GUI built with PyQt6 for setting up a wide range of quantum chemistry calculations.
-- **Structure Generation:** Generate 3D structures directly from SMILES strings using the integrated RDKit.
-- **Advanced 3D Molecule Viewer:** A high-performance 3D viewer built with [Vispy](http://vispy.org/) for visualizing molecular structures with ball-and-stick models, lighting, and smooth controls.
+- **Structure Generation:** Generate 3D structures from SMILES strings or load from XYZ files.
+- **Robust XYZ File Support:** Automatically infers bond connectivity from XYZ coordinate files for seamless visualization.
+- **Advanced 3D Molecule Viewer:** A high-performance 3D viewer built with [Vispy](http://vispy.org/) for visualizing molecular structures. Features a trackball-style camera for unrestricted 3D rotation.
 - **Job Queue Management:**
     - Queue up multiple ORCA calculations to run sequentially.
     - Monitor job status (Queued, Running, Completed, Failed, Cancelled).

@@ -3,7 +3,7 @@ import os
 import time
 import traceback
 
-from PyQt6.QtCore import QSettings, Qt
+from PyQt6.QtCore import QSettings, Qt, QBuffer
 from PyQt6.QtGui import QFont, QPixmap
 from PyQt6.QtWidgets import (
     QMainWindow, QVBoxLayout, QWidget, QTabWidget, QMessageBox, QFileDialog
@@ -95,6 +95,8 @@ class MainWindow(QMainWindow):
         )
         # Coordinates generation
         self.coordinates_tab.generate_from_smiles_button.clicked.connect(self._generate_structure_from_smiles)
+        self.coordinates_tab.load_from_file_button.clicked.connect(self._load_from_xyz_file)
+        self.coordinates_tab.load_from_paste_button.clicked.connect(self._load_from_pasted_xyz)
         self.coordinates_tab.view_3d_button.clicked.connect(self._open_3d_viewer)
         # Input generation
         self.submission_tab.generate_button.clicked.connect(self._generate_input)
@@ -112,36 +114,118 @@ class MainWindow(QMainWindow):
         if file_path:
             self.submission_tab.prepared_input_path_input.setText(file_path)
 
+    def _load_from_xyz_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Load XYZ File", "", "XYZ Files (*.xyz);;All Files (*)")
+        if not file_path:
+            return
+        try:
+            with open(file_path, 'r') as f:
+                xyz_block = f.read()
+            self._process_molecule_from_xyz(xyz_block)
+        except Exception as e:
+            QMessageBox.critical(self, "File Error", f"Failed to read or process XYZ file.\n\nError: {e}")
+
+    def _load_from_pasted_xyz(self):
+        xyz_block = self.coordinates_tab.xyz_paste_input.toPlainText().strip()
+        if not xyz_block:
+            QMessageBox.warning(self, "Input Error", "The XYZ input box is empty.")
+            return
+        self._process_molecule_from_xyz(xyz_block)
+
+    def _process_molecule_from_xyz(self, xyz_block):
+        """A robust method to parse XYZ data (from file or paste) and update the UI."""
+        try:
+            # Sanitize the block and split into non-empty lines using splitlines()
+            lines = [line.strip() for line in xyz_block.splitlines() if line.strip()]
+            
+            # If the first line is not a digit, assume it's raw coordinates
+            if not lines[0].isdigit():
+                num_atoms = len(lines)
+                # Add the atom count and a blank comment line to create a valid XYZ block
+                xyz_data_for_rdkit = f"{num_atoms}\n\n" + "\n".join(lines)
+            else:
+                # The first line is the atom count. The second is a comment.
+                # The rest are the coordinates.
+                num_atoms = int(lines[0])
+                # Ensure the number of coordinate lines matches the atom count
+                if len(lines) - 2 != num_atoms:
+                    raise ValueError(
+                        f"XYZ format error: Atom count is {num_atoms}, but {len(lines) - 2} coordinates were found."
+                    )
+                # Reconstruct the block to ensure it's in a standard format for RDKit
+                xyz_data_for_rdkit = "\n".join(lines)
+
+            # Create a molecule from the XYZ block. This molecule has no bonds yet.
+            mol_no_bonds = Chem.MolFromXYZBlock(xyz_data_for_rdkit)
+            if mol_no_bonds is None:
+                raise ValueError("RDKit could not parse the XYZ data. Please check the format.")
+
+            # Create a molecule from the XYZ block. This molecule has no bonds yet.
+            mol = Chem.MolFromXYZBlock(xyz_data_for_rdkit)
+            if mol is None:
+                raise ValueError("RDKit could not parse the XYZ data.")
+
+            try:
+                # Determine connectivity based on atomic distances
+                from rdkit.Chem import rdDetermineBonds
+                rdDetermineBonds.DetermineConnectivity(mol)
+                Chem.SanitizeMol(mol)
+            except Exception as bond_error:
+                print(f"Could not infer bonds: {bond_error}")
+                # Fallback to the molecule without bonds if inference fails
+
+            self._update_ui_with_molecule(mol)
+
+        except Exception as e:
+            QMessageBox.critical(self, "XYZ Processing Error", f"Failed to load structure from XYZ data.\n\nError: {e}")
+            self.current_molecule = None
+            self.coordinates_tab.mol_image_label.setText("2D depiction failed.")
+            self.coordinates_tab.coordinates_input.clear()
+
+    def _update_ui_with_molecule(self, mol):
+        """Updates the coordinates tab UI with the new molecule."""
+        self.current_molecule = mol
+
+        # Update 2D depiction using a more robust method
+        try:
+            pil_img = Draw.MolToImage(mol, size=(300, 300))
+            # Convert PIL image to QPixmap
+            buffer = QBuffer()
+            buffer.open(QBuffer.OpenModeFlag.ReadWrite)
+            pil_img.save(buffer, "PNG")
+            pixmap = QPixmap()
+            pixmap.loadFromData(buffer.data(), "PNG")
+            self.coordinates_tab.mol_image_label.setPixmap(pixmap)
+        except Exception as e:
+            print(f"Failed to generate 2D depiction: {e}")
+            self.coordinates_tab.mol_image_label.setText("2D depiction failed.")
+
+        # Update 3D coordinates text
+        xyz = Chem.MolToXYZBlock(mol)
+        self.coordinates_tab.coordinates_input.setText(xyz)
+
     def _generate_structure_from_smiles(self):
         smiles = self.coordinates_tab.smiles_input.text()
         if not smiles:
-            QMessageBox.warning(self, "Input Error", "Please enter a SMILES string.")
+            QMessageBox.warning(self, "Input Error", "SMILES input is empty.")
             return
+
         try:
             mol = Chem.MolFromSmiles(smiles)
             if mol is None:
                 raise ValueError("Invalid SMILES string")
-            temp_img_file = "_temp_mol.png"
-            Draw.MolToFile(mol, temp_img_file, size=(300, 300))
-            if os.path.exists(temp_img_file):
-                pixmap = QPixmap(temp_img_file)
-                self.coordinates_tab.mol_image_label.setPixmap(pixmap)
-                os.remove(temp_img_file)
-            else:
-                self.coordinates_tab.mol_image_label.setText("2D depiction could not be generated.")
-            mol_with_h = Chem.AddHs(mol, addCoords=True)
-            params = AllChem.ETKDGv3()
-            params.randomSeed = 1
-            AllChem.EmbedMolecule(mol_with_h, params)
-            AllChem.MMFFOptimizeMolecule(mol_with_h)
-            xyz_block = Chem.MolToXYZBlock(mol_with_h)
-            xyz_coords = "\n".join(xyz_block.strip().split('\n')[2:])
-            self.coordinates_tab.coordinates_input.setPlainText(xyz_coords)
-            self.current_molecule = mol_with_h
-            self.signals.coordinates_generated.emit(xyz_coords)
+
+            # Add hydrogens and generate 3D coordinates
+            mol = Chem.AddHs(mol)
+            AllChem.EmbedMolecule(mol, AllChem.ETKDG())
+            AllChem.UFFOptimizeMolecule(mol)
+
+            self._update_ui_with_molecule(mol)
+
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to generate structure: {e}")
-            self.coordinates_tab.mol_image_label.setText("Error generating depiction.")
+            QMessageBox.critical(self, "SMILES Error", f"Failed to generate structure: {e}")
+            self.current_molecule = None
+            self.coordinates_tab.mol_image_label.setText("2D depiction failed.")
             self.coordinates_tab.coordinates_input.clear()
 
     def _generate_input(self):

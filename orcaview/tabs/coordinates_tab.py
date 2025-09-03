@@ -10,7 +10,22 @@ class CoordinatesTab(QWidget):
         coords_layout.addRow("SMILES Input:", self.smiles_input)
 
         self.generate_from_smiles_button = QPushButton("Generate Structure from SMILES")
-        coords_layout.addRow(self.generate_from_smiles_button)
+
+        # Buttons for loading coordinates
+        load_buttons_layout = QHBoxLayout()
+        self.load_from_file_button = QPushButton("Load from XYZ File")
+        self.load_from_paste_button = QPushButton("Paste XYZ Coordinates")
+        load_buttons_layout.addWidget(self.generate_from_smiles_button)
+        load_buttons_layout.addWidget(self.load_from_file_button)
+        load_buttons_layout.addWidget(self.load_from_paste_button)
+        coords_layout.addRow(load_buttons_layout)
+
+        # Widget for pasting XYZ coordinates
+        self.xyz_paste_input = QTextEdit()
+        self.xyz_paste_input.setPlaceholderText("Or paste XYZ coordinates here...")
+        self.xyz_paste_input.setVisible(False) # Initially hidden
+        coords_layout.addRow(self.xyz_paste_input)
+
 
         self.mol_image_label = QLabel("2D depiction will be shown here.")
         self.mol_image_label.setFixedSize(300, 300)

@@ -5,7 +5,9 @@ A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program]
 ## Key Features
 
 - **Intuitive Interface:** A user-friendly GUI built with PyQt6 for setting up a wide range of quantum chemistry calculations.
-- **Structure Generation:** Generate 3D structures from SMILES strings or load from XYZ files.
+- **Structure Generation:** Generate 3D structures from SMILES strings.
+- **Coordinate Loading:** Load molecular coordinates directly from XYZ files or by pasting them into the application.
+- **Job Type Support:** Includes support for a variety of job types, including Single Point, Geometry Optimization, Frequencies, and GOAT (Global Optimization).
 - **Robust XYZ File Support:** Automatically infers bond connectivity from XYZ coordinate files for seamless visualization.
 - **Advanced 3D Molecule Viewer:** A high-performance 3D viewer built with [Vispy](http://vispy.org/) for visualizing molecular structures. Features a trackball-style camera for unrestricted 3D rotation.
 - **Job Queue Management:**
@@ -46,29 +48,19 @@ To run ORCAView from source, follow these steps:
 
 ## Building a Portable Version (Windows)
 
-A portable, folder-based distribution can be created using PyInstaller. Due to dependencies on Vispy, the `.spec` file requires modification.
+A portable, folder-based distribution can be created using the included `build_portable.spec` file.
 
 1.  **Install PyInstaller:**
     ```bash
     pip install pyinstaller
     ```
 
-2.  **Generate the initial `.spec` file:**
-    ```bash
-    pyinstaller --name ORCAView --windowed main.py
-    ```
-
-3.  **Modify `ORCAView.spec`:**
-    Make the following two changes to the generated `ORCAView.spec` file to ensure Vispy's resources are correctly packaged:
-    - Add `(os.path.join(os.path.dirname(vispy.__file__), 'glsl'), 'vispy/glsl')` to the `datas` list.
-    - Add `'vispy.app.backends._pyqt6'` to the `hiddenimports` list.
-
-4.  **Run the build:**
+2.  **Run the build:**
     From the root of the project directory, run:
     ```bash
-    pyinstaller ORCAView.spec --noconfirm
+    pyinstaller build_portable.spec --noconfirm
     ```
 
-5.  The complete, portable application will be located in the `dist/ORCAView` directory.
+3.  The complete, portable application will be located in the `dist/ORCAView` directory.
 
 

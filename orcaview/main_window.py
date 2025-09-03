@@ -96,7 +96,7 @@ class MainWindow(QMainWindow):
         # Coordinates generation
         self.coordinates_tab.generate_from_smiles_button.clicked.connect(self._generate_structure_from_smiles)
         self.coordinates_tab.load_from_file_button.clicked.connect(self._load_from_xyz_file)
-        self.coordinates_tab.load_from_paste_button.clicked.connect(self._load_from_pasted_xyz)
+        self.coordinates_tab.load_from_paste_button.clicked.connect(self._toggle_paste_xyz_input)
         self.coordinates_tab.view_3d_button.clicked.connect(self._open_3d_viewer)
         # Input generation
         self.submission_tab.generate_button.clicked.connect(self._generate_input)
@@ -337,6 +337,19 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Job Error", f"Failed to create and queue job: {e}")
             return False
+
+    def _toggle_paste_xyz_input(self):
+        paste_input = self.coordinates_tab.xyz_paste_input
+        is_visible = paste_input.isVisible()
+        paste_input.setVisible(not is_visible)
+
+        if is_visible:
+            # If it was visible, now it's hidden, so process the text
+            self._load_from_pasted_xyz()
+            self.coordinates_tab.load_from_paste_button.setText("Paste XYZ Coordinates")
+        else:
+            # If it was hidden, now it's visible
+            self.coordinates_tab.load_from_paste_button.setText("Load Pasted XYZ")
 
     def _add_prepared_input_to_queue(self):
         input_path = self.submission_tab.prepared_input_path_input.text().strip()

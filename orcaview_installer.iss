@@ -8,11 +8,11 @@ Compression=lzma
 SolidCompression=yes
 
 [Files]
-Source: "C:\Windsurf stuff\ORCAView\dist\main\*"; DestDir: "{app}"; Flags: recursesubdirs
+Source: "dist\ORCAView\*"; DestDir: "{app}"; Flags: recursesubdirs
 
 [Icons]
-Name: "{group}\ORCAView"; Filename: "{app}\main.exe"
+Name: "{group}\ORCAView"; Filename: "{app}\ORCAView.exe"
 Name: "{group}\Uninstall ORCAView"; Filename: "{uninstallexe}"
 
 [Run]
-Filename: "{app}\main.exe"; Description: "Launch ORCAView"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\ORCAView.exe"; Description: "Launch ORCAView"; Flags: nowait postinstall skipifsilent

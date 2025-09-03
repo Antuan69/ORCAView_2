@@ -13,7 +13,8 @@ JOB_TYPES = {
     "Transition State Search": "OptTS",
     "Composite Methods": "",
     "NEB": "NEB",
-    "IRC": "IRC"
+    "IRC": "IRC",
+    "GOAT": "GOAT"
 }
 
 METHODS = ["DFT", "HF", "Semi-Empirical", "xTB"]

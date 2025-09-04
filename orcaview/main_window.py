@@ -188,7 +188,10 @@ class MainWindow(QMainWindow):
 
         # Update 2D depiction using a more robust method
         try:
-            pil_img = Draw.MolToImage(mol, size=(300, 300))
+            # Create a copy for drawing and remove hydrogens
+            mol_for_drawing = Chem.Mol(mol)
+            mol_for_drawing = Chem.RemoveHs(mol_for_drawing)
+            pil_img = Draw.MolToImage(mol_for_drawing, size=(300, 300))
             # Convert PIL image to QPixmap
             buffer = QBuffer()
             buffer.open(QBuffer.OpenModeFlag.ReadWrite)
@@ -215,12 +218,37 @@ class MainWindow(QMainWindow):
             if mol is None:
                 raise ValueError("Invalid SMILES string")
 
-            # Add hydrogens and generate 3D coordinates
             mol = Chem.AddHs(mol)
-            AllChem.EmbedMolecule(mol, AllChem.ETKDG())
-            AllChem.UFFOptimizeMolecule(mol)
 
-            self._update_ui_with_molecule(mol)
+            # Set up multithreading parameters for conformer generation
+            num_conformers = 50
+            num_cores = os.cpu_count() or 1
+            params = AllChem.ETKDG()
+            params.numThreads = num_cores
+
+            # Generate and optimize conformers using multithreading
+            AllChem.EmbedMultipleConfs(mol, numConfs=num_conformers, params=params)
+            results = AllChem.UFFOptimizeMoleculeConfs(mol, numThreads=num_cores)
+
+            # Find the conformer with the lowest energy
+            min_energy = float('inf')
+            min_energy_id = -1
+            for i, result in enumerate(results):
+                if not result[0] and result[1] < min_energy:
+                    min_energy = result[1]
+                    min_energy_id = i
+
+            # If all optimizations failed, fallback to the first conformer
+            if min_energy_id == -1:
+                min_energy_id = 0
+
+            # Create a new molecule containing only the lowest-energy conformer
+            final_mol = Chem.Mol(mol)
+            final_mol.RemoveAllConformers()
+            conf = mol.GetConformer(min_energy_id)
+            final_mol.AddConformer(conf, assignId=True)
+
+            self._update_ui_with_molecule(final_mol)
 
         except Exception as e:
             QMessageBox.critical(self, "SMILES Error", f"Failed to generate structure: {e}")

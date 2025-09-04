@@ -5,7 +5,8 @@ A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program]
 ## Key Features
 
 - **Intuitive Interface:** A user-friendly GUI built with PyQt6 for setting up a wide range of quantum chemistry calculations.
-- **Structure Generation:** Generate 3D structures from SMILES strings.
+- **High-Performance 3D Structure Generation:** Generate low-energy, optimized 3D structures from SMILES strings at high speed using multithreading for conformer searching and optimization.
+- **Standardized 2D Depiction:** Automatically generate clean, standardized 2D molecular drawings with hydrogens on carbon atoms removed for clarity.
 - **Coordinate Loading:** Load molecular coordinates directly from XYZ files or by pasting them into the application.
 - **Job Type Support:** Includes support for a variety of job types, including Single Point, Geometry Optimization, Frequencies, and GOAT (Global Optimization).
 - **Robust XYZ File Support:** Automatically infers bond connectivity from XYZ coordinate files for seamless visualization.

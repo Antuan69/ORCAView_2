@@ -1,6 +1,10 @@
 # Core application framework
 PyQt6
 
+# Web-based features
+PyQt6-WebEngine
+Flask
+
 # Cheminformatics and molecule handling
 rdkit-pypi
 

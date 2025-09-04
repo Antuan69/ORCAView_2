@@ -2,6 +2,7 @@ import sys
 import os
 import time
 import traceback
+import threading
 
 from PyQt6.QtCore import QSettings, Qt, QBuffer
 from PyQt6.QtGui import QFont, QPixmap
@@ -26,6 +27,8 @@ from .menu import MainMenu
 from .signals import AppSignals
 from .input_generator import OrcaInputGenerator
 from .viewer_3d import MoleculeViewer3D
+from .ketcher_server import run_server
+from .ketcher_window import KetcherWindow
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -80,6 +83,10 @@ class MainWindow(QMainWindow):
 
         # Internal state
         self.current_molecule = None
+        self.ketcher_window = None
+
+        # Start the Ketcher server in a background thread
+        self._start_ketcher_server()
 
     def _connect_signals(self):
         # Job type selection
@@ -98,6 +105,7 @@ class MainWindow(QMainWindow):
         self.coordinates_tab.load_from_file_button.clicked.connect(self._load_from_xyz_file)
         self.coordinates_tab.load_from_paste_button.clicked.connect(self._toggle_paste_xyz_input)
         self.coordinates_tab.view_3d_button.clicked.connect(self._open_3d_viewer)
+        self.coordinates_tab.draw_molecule_button.clicked.connect(self._open_ketcher_window)
         # Input generation
         self.submission_tab.generate_button.clicked.connect(self._generate_input)
         self.submission_tab.save_button.clicked.connect(self._save_and_submit)
@@ -463,3 +471,38 @@ class MainWindow(QMainWindow):
 
     def _refresh_job_queue_tab(self):
         self.job_queue_tab.refresh()
+
+    def _start_ketcher_server(self):
+        """Runs the Flask server for Ketcher in a background thread."""
+
+        server_thread = threading.Thread(target=run_server)
+        server_thread.daemon = True
+        server_thread.start()
+
+    def _open_ketcher_window(self):
+        """Opens the Ketcher molecular editor window."""
+        if self.ketcher_window is None or not self.ketcher_window.isVisible():
+            self.ketcher_window = KetcherWindow()
+            self.ketcher_window.molecule_updated.connect(self._handle_molecule_from_ketcher)
+            self.ketcher_window.show()
+        else:
+            self.ketcher_window.activateWindow()
+
+    def _handle_molecule_from_ketcher(self, molfile):
+        """Receives a molfile from the Ketcher window and updates the UI."""
+        if not molfile:
+            return
+        try:
+            mol = Chem.MolFromMolBlock(molfile, sanitize=True)
+            if mol is None:
+                raise ValueError("RDKit could not parse the Molfile.")
+
+            # Add hydrogens and generate a 3D conformer
+            mol = Chem.AddHs(mol, addCoords=True)
+            AllChem.EmbedMolecule(mol, AllChem.ETKDG())
+            AllChem.UFFOptimizeMolecule(mol)
+
+            self._update_ui_with_molecule(mol)
+
+        except Exception as e:
+            QMessageBox.critical(self, "Ketcher Error", f"Failed to process molecule from Ketcher.\n\nError: {e}")

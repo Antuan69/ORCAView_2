@@ -41,5 +41,7 @@ class CoordinatesTab(QWidget):
         coords_header_layout.addStretch()
         self.view_3d_button = QPushButton("View 3D")
         coords_header_layout.addWidget(self.view_3d_button)
+        self.draw_molecule_button = QPushButton("Draw Molecule (Ketcher)")
+        coords_header_layout.addWidget(self.draw_molecule_button)
         coords_layout.addRow(coords_header_layout)
         coords_layout.addRow(self.coordinates_input)

@@ -18,6 +18,7 @@ A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program]
     - View live output files for running calculations.
 - **Flexible Input Generation:** Supports a wide variety of ORCA methods, basis sets, solvation models, and keywords.
 - **Custom Input Blocks:** A dedicated tab to add any of the official ORCA input blocks (%geom, %casscf, etc.) with custom keywords, providing advanced control over the calculation.
+- **Ketcher Molecular Editor:** Draw molecules in a 2D editor and import them directly into the coordinates tab. The editor is launched via the "Draw Molecule (Ketcher)" button.
 - **Portable Builds:** Includes a PyInstaller script to create a standalone, portable version for Windows.
 
 ## Recent Updates (v1.1.0)
@@ -47,9 +48,15 @@ To run ORCAView from source, follow these steps:
     python -m venv venv
     source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
     pip install -r requirements.txt
+
+4.  **Set up Ketcher (Optional):**
+    To use the Ketcher molecular editor, you must download and extract it:
+    - Download `ketcher-standalone-3.4.0.zip`.
+    - Unzip its contents into the `orcaview/ketcher/` directory.
+    - The final structure should be `orcaview/ketcher/standalone/index.html`.
     ```
 
-4.  **Run the application:**
+5.  **Run the application:**
     ```bash
     python main.py
     ```

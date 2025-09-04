@@ -1,6 +1,12 @@
+# Core application framework
 PyQt6
+
+# Cheminformatics and molecule handling
 rdkit-pypi
+
+# 3D visualization
 vispy
 numpy
+
 # For building a portable version
 pyinstaller

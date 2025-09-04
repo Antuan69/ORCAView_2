@@ -31,14 +31,17 @@ class OrcaInputGenerator:
         # Add any blocks
         block_lines = []
         for name, content in self.blocks.items():
-            block_lines.append(f"%{name}\n    {content}\nend")
+            block_str = f"%{name}\n    {content}"
+            # The %maxcore block does not have an 'end' statement
+            if name.strip().lower() != "maxcore":
+                block_str += "\nend"
+            block_lines.append(block_str)
 
         # Prepare the coordinate block
         coord_header = f" * xyz {self.charge} {self.multiplicity}"
         coord_lines = [f"{atom:2s} {x:12.8f} {y:12.8f} {z:12.8f}" for atom, x, y, z in self.coordinates]
         coord_block = [coord_header] + coord_lines + ["*"]
 
-        # Assemble the final input
         # Assemble the final input
         final_input_parts = [keyword_line]
         if block_lines:
@@ -52,29 +55,3 @@ class OrcaInputGenerator:
         main_section = "\n\n".join(final_input_parts[:-1])
         coord_section = final_input_parts[-1]
         return f"{main_section}\n\n{coord_section}"
-
-
-        if self.keywords:
-            input_lines.append(f"! {' '.join(self.keywords)}")
-
-        # Add blocks
-        for block_name, block_content in self.blocks.items():
-            input_lines.append("")  # Add empty line before each block
-            input_lines.append(f"%{block_name}")
-            input_lines.append(block_content)
-            if block_name.strip().lower() != "maxcore":
-                input_lines.append("end")
-
-
-        # Always ensure a blank line before the coordinate block
-        if input_lines and input_lines[-1].strip() != '':
-            input_lines.append("")
-        input_lines.append(f"* xyz {self.charge} {self.multiplicity}")
-        for atom in self.coordinates:
-            line = f"  {atom[0]:<2} {atom[1]:>12.6f} {atom[2]:>12.6f} {atom[3]:>12.6f}"
-            input_lines.append(line)
-        input_lines.append("*")
-
-        # Join and strip any trailing blank lines
-        result = "\n".join(input_lines).rstrip() + "\n"
-        return result

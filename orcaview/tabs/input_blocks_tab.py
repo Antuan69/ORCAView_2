@@ -63,13 +63,15 @@ class InputBlocksTab(QWidget):
         self.update_added_blocks_list()
         self.block_content_edit.clear()
 
-    def remove_block(self):
-        selected_items = self.added_blocks_list.selectedItems()
-        if not selected_items: 
-            return
-        
-        block_name_to_remove = selected_items[0].text().split(' ')[0]
-        
+    def remove_block(self, block_name=None):
+        block_name_to_remove = block_name
+
+        if block_name_to_remove is None:
+            selected_items = self.added_blocks_list.selectedItems()
+            if not selected_items:
+                return
+            block_name_to_remove = selected_items[0].text().split(' ')[0]
+
         if block_name_to_remove in self.input_blocks:
             del self.input_blocks[block_name_to_remove]
             self.update_added_blocks_list()

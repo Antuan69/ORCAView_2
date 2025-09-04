@@ -20,6 +20,13 @@ A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program]
 - **Custom Input Blocks:** A dedicated tab to add any of the official ORCA input blocks (%geom, %casscf, etc.) with custom keywords, providing advanced control over the calculation.
 - **Portable Builds:** Includes a PyInstaller script to create a standalone, portable version for Windows.
 
+## Recent Updates (v1.1.0)
+
+- **Stability Fixes:**
+    - Resolved a critical crash in the 3D molecule viewer by ensuring the `vispy` PyQt6 backend is correctly included in portable builds.
+    - Fixed a bug that caused the application to crash when adding or updating custom input blocks.
+    - Corrected the ORCA input file generator to no longer write a redundant `end` statement for the `%maxcore` block, ensuring valid input files.
+
 ## Installation and Usage
 
 To run ORCAView from source, follow these steps:
@@ -60,6 +67,8 @@ A portable, folder-based distribution can be created using the included `build_p
     From the root of the project directory, run:
     ```bash
     pyinstaller build_portable.spec --noconfirm
+
+    The build process is configured to automatically exclude `PySide6` to prevent conflicts with `PyQt6`.
     ```
 
 3.  The complete, portable application will be located in the `dist/ORCAView` directory.

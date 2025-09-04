@@ -21,9 +21,17 @@ A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program]
 - **Ketcher Molecular Editor:** Draw molecules in a 2D editor and import them directly into the coordinates tab. The editor is launched via the "Draw Molecule (Ketcher)" button.
 - **Portable Builds:** Includes a PyInstaller script to create a standalone, portable version for Windows.
 
-## Recent Updates (v1.1.0)
+## Recent Updates (v1.2.0)
 
-- **Stability Fixes:**
+- **UI Enhancements:**
+    - The "Coordinates" tab is now the first tab, making it the default view on startup.
+    - The "Draw Molecule (Ketcher)" button has been moved to the primary button row for easier access.
+    - The 2D molecule depiction viewer is now centered for a more balanced and symmetrical layout.
+
+
+- **Ketcher Integration & Stability:**
+    - Implemented a robust, two-way communication channel to reliably fetch the SMILES string from the Ketcher editor, resolving all data transfer issues.
+    - Fixed a series of bugs, including an `AttributeError` and a `NameError`, to ensure the Ketcher workflow is stable and functional.
     - Resolved a critical crash in the 3D molecule viewer by ensuring the `vispy` PyQt6 backend is correctly included in portable builds.
     - Fixed a bug that caused the application to crash when adding or updating custom input blocks.
     - Corrected the ORCA input file generator to no longer write a redundant `end` statement for the `%maxcore` block, ensuring valid input files.

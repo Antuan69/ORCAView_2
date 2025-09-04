@@ -60,17 +60,16 @@ class MainWindow(QMainWindow):
 
         # Ensure solvation models are filtered for the initial method
         initial_method = self.method_tab.method_combo.currentText()
-        self._on_method_changed(initial_method)
         self.job_queue_manager = JobQueueManager(on_update_callback=self._refresh_job_queue_tab)
         self.job_queue_tab = JobQueueTab(self.job_queue_manager)
 
         # Add tabs to the main tab widget
+        self.tabs.addTab(self.coordinates_tab, "Coordinates")
         self.tabs.addTab(self.job_type_tab, "Job Type")
         self.tabs.addTab(self.method_tab, "Method")
         self.tabs.addTab(self.solvation_tab, "Solvation")
         self.tabs.addTab(self.advanced_options_tab, "Advanced")
         self.tabs.addTab(self.input_blocks_tab, "Input Blocks")
-        self.tabs.addTab(self.coordinates_tab, "Coordinates")
         self.tabs.addTab(self.submission_tab, "Submission")
         self.tabs.addTab(self.job_queue_tab, "Job Queue")
 
@@ -87,6 +86,7 @@ class MainWindow(QMainWindow):
 
         # Start the Ketcher server in a background thread
         self._start_ketcher_server()
+        self._on_method_changed(initial_method)
 
     def _connect_signals(self):
         # Job type selection
@@ -483,26 +483,15 @@ class MainWindow(QMainWindow):
         """Opens the Ketcher molecular editor window."""
         if self.ketcher_window is None or not self.ketcher_window.isVisible():
             self.ketcher_window = KetcherWindow()
-            self.ketcher_window.molecule_updated.connect(self._handle_molecule_from_ketcher)
+            self.ketcher_window.smiles_updated.connect(self._handle_smiles_from_ketcher)
             self.ketcher_window.show()
         else:
             self.ketcher_window.activateWindow()
 
-    def _handle_molecule_from_ketcher(self, molfile):
-        """Receives a molfile from the Ketcher window and updates the UI."""
-        if not molfile:
-            return
-        try:
-            mol = Chem.MolFromMolBlock(molfile, sanitize=True)
-            if mol is None:
-                raise ValueError("RDKit could not parse the Molfile.")
-
-            # Add hydrogens and generate a 3D conformer
-            mol = Chem.AddHs(mol, addCoords=True)
-            AllChem.EmbedMolecule(mol, AllChem.ETKDG())
-            AllChem.UFFOptimizeMolecule(mol)
-
-            self._update_ui_with_molecule(mol)
-
-        except Exception as e:
-            QMessageBox.critical(self, "Ketcher Error", f"Failed to process molecule from Ketcher.\n\nError: {e}")
+    def _handle_smiles_from_ketcher(self, smiles):
+        """Handles the SMILES string received from the Ketcher window."""
+        if smiles:
+            # Set the SMILES string in the coordinates tab's input field
+            self.coordinates_tab.smiles_input.setText(smiles)
+            # Automatically trigger the structure generation
+            self.coordinates_tab.generate_from_smiles_button.click()

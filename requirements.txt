@@ -10,7 +10,10 @@ rdkit-pypi
 
 # 3D visualization
 vispy
-numpy
+numpy<2.0
+
+# For syntax highlighting
+Pygments
 
 # For building a portable version
 pyinstaller

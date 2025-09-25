@@ -116,6 +116,9 @@ class MainWindow(QMainWindow):
         self.submission_tab.output_file_path_input.textEdited.connect(self._disable_output_path_autoupdate)
         self.submission_tab.add_prepared_input_button.clicked.connect(self._add_prepared_input_to_queue)
         self.submission_tab.prepared_input_browse_button.clicked.connect(self._browse_for_prepared_input_file)
+        self.submission_tab.orca_path_button.clicked.connect(self._browse_for_orca_executable)
+        # Save ORCA path when manually entered
+        self.submission_tab.orca_path_input.textChanged.connect(self._save_orca_path)
 
     def _browse_for_prepared_input_file(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select Prepared ORCA Input File", "", "ORCA Input Files (*.inp);;All Files (*)")
@@ -362,10 +365,26 @@ class MainWindow(QMainWindow):
             input_path_win = input_path.replace('/', '\\')
             output_path_win = output_path.replace('/', '\\')
 
-            orca_cmd = f'"{orca_path_win}" "{input_path_win}" > "{output_path_win}"'
+            orca_cmd = f'"{orca_path_win}" "{input_path_win}" > "{output_path_win}" 2>&1'
             
             with open(bat_path, 'w') as bat_file:
-                bat_file.write(f'@echo off\n{orca_cmd}\n')
+                bat_file.write(f'@echo off\n')
+                bat_file.write(f'echo Starting ORCA calculation...\n')
+                bat_file.write(f'echo ORCA Path: "{orca_path_win}"\n')
+                bat_file.write(f'echo Input File: "{input_path_win}"\n')
+                bat_file.write(f'echo Output File: "{output_path_win}"\n')
+                bat_file.write(f'if not exist "{orca_path_win}" (\n')
+                bat_file.write(f'    echo ERROR: ORCA executable not found at "{orca_path_win}"\n')
+                bat_file.write(f'    exit /b 1\n')
+                bat_file.write(f')\n')
+                bat_file.write(f'if not exist "{input_path_win}" (\n')
+                bat_file.write(f'    echo ERROR: Input file not found at "{input_path_win}"\n')
+                bat_file.write(f'    exit /b 1\n')
+                bat_file.write(f')\n')
+                bat_file.write(f'{orca_cmd}\n')
+                bat_file.write(f'set ORCA_EXIT_CODE=%ERRORLEVEL%\n')
+                bat_file.write(f'echo ORCA finished with exit code: %ORCA_EXIT_CODE%\n')
+                bat_file.write(f'exit /b %ORCA_EXIT_CODE%\n')
 
             job = OrcaJob(input_path, output_path, bat_path, orca_path)
             self.job_queue_manager.add_job(job)
@@ -399,8 +418,11 @@ class MainWindow(QMainWindow):
             return
 
         orca_path = self.settings.value("orca_path", "").strip()
-        if not orca_path or not os.path.isfile(orca_path):
-            QMessageBox.warning(self, "Configuration Error", "ORCA executable path is not set or invalid. Please set it in the Settings menu.")
+        if not orca_path:
+            QMessageBox.warning(self, "Configuration Error", "ORCA executable path is not set. Please browse for the ORCA executable in the Submission tab.")
+            return
+        if not os.path.isfile(orca_path):
+            QMessageBox.warning(self, "Configuration Error", f"ORCA executable not found at: {orca_path}\n\nPlease browse for the correct ORCA executable in the Submission tab.")
             return
 
         if self._enqueue_job(input_path, output_path, orca_path):
@@ -420,8 +442,11 @@ class MainWindow(QMainWindow):
             return
 
         orca_path = self.settings.value("orca_path", "").strip()
-        if not orca_path or not os.path.isfile(orca_path):
-            QMessageBox.warning(self, "Configuration Error", "ORCA executable path is not set or invalid. Please set it in the Settings menu.")
+        if not orca_path:
+            QMessageBox.warning(self, "Configuration Error", "ORCA executable path is not set. Please browse for the ORCA executable in the Submission tab.")
+            return
+        if not os.path.isfile(orca_path):
+            QMessageBox.warning(self, "Configuration Error", f"ORCA executable not found at: {orca_path}\n\nPlease browse for the correct ORCA executable in the Submission tab.")
             return
 
         try:
@@ -456,6 +481,19 @@ class MainWindow(QMainWindow):
         filename, _ = QFileDialog.getSaveFileName(self, "Select Output File", "", "ORCA Output Files (*.out);;All Files (*)")
         if filename:
             self.submission_tab.output_file_path_input.setText(filename)
+
+    def _browse_for_orca_executable(self):
+        """Browse for ORCA executable file."""
+        filename, _ = QFileDialog.getOpenFileName(self, "Select ORCA Executable", "", "Executable Files (*.exe);;All Files (*)")
+        if filename:
+            self.submission_tab.orca_path_input.setText(filename)
+            # Save the ORCA path to settings
+            self.settings.setValue("orca_path", filename)
+
+    def _save_orca_path(self, path):
+        """Save ORCA path to settings when manually entered."""
+        if path.strip():
+            self.settings.setValue("orca_path", path.strip())
 
     def _auto_update_output_path(self):
         if not getattr(self, '_output_path_autoupdate_enabled', True):

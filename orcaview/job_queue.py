@@ -81,7 +81,7 @@ class JobQueueManager:
                 job.status = JobStatus.RUNNING
                 job.started_time = time.strftime('%Y-%m-%d %H:%M:%S')
                 print('SET JOB TO RUNNING:', job.input_path)
-                # self._trigger_update()  # Do not call from worker thread
+                self._trigger_update()  # Update UI when job starts running
             if job:
                 try:
                     print('STEP: about to import subprocess and os')
@@ -137,7 +137,7 @@ class JobQueueManager:
                                 job.status = JobStatus.CANCELLED
                                 job.finished_time = time.strftime('%Y-%m-%d %H:%M:%S')
                                 print('JOB CANCELLED:', job.input_path)
-                                self._trigger_update()
+                                self._trigger_update()  # Update UI when job is cancelled
                                 break
                         if job.process.poll() is not None:
                             break
@@ -184,12 +184,8 @@ class JobQueueManager:
                     self.completed_jobs.append(job)
                     self.running_job = None
                     print('JOB MOVED TO COMPLETED:', job.input_path)
-                    # Only call _trigger_update from main thread
-                    # Only update UI from main thread
-                    # if threading.current_thread() == threading.main_thread():
-                    #     self._trigger_update()
-                    # else:
-                    #     print('WARNING: _trigger_update called from worker thread, skipping to avoid GUI crash.')
+                    # Trigger UI update when job completes
+                    self._trigger_update()
             time.sleep(0.5)
 
     def stop(self):

@@ -3,7 +3,6 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout
 from rdkit import Chem
 import numpy as np
 from vispy import scene
-from vispy import scene
 from vispy.geometry import generation
 from vispy.scene import visuals
 from vispy.visuals.filters import ShadingFilter

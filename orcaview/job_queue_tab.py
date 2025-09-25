@@ -18,7 +18,19 @@ class JobQueueTab(QWidget):
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self._show_context_menu)
         self._open_monitors = []  # Hold references to open monitor dialogs
+        
+        # Set up automatic refresh timer
+        self.refresh_timer = QTimer()
+        self.refresh_timer.timeout.connect(self.refresh)
+        self.refresh_timer.start(2000)  # Refresh every 2 seconds
+        
         self.refresh()
+
+    def closeEvent(self, event):
+        """Clean up timer when tab is closed."""
+        if hasattr(self, 'refresh_timer'):
+            self.refresh_timer.stop()
+        super().closeEvent(event)
 
     def refresh(self):
         jobs = self.queue_manager.get_all_jobs()
@@ -85,7 +97,7 @@ class JobQueueTab(QWidget):
             actions_layout.addStretch()
             actions_widget.setLayout(actions_layout)
             actions_widget.setMinimumWidth(150)
-            self.table.setCellWidget(row, 6, actions_widget)
+            self.table.setCellWidget(row, 7, actions_widget)
         self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
 

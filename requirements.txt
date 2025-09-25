@@ -6,7 +6,8 @@ PyQt6-WebEngine
 Flask
 
 # Cheminformatics and molecule handling
-rdkit-pypi
+# Note: Using rdkit instead of rdkit-pypi for better compatibility
+rdkit
 
 # 3D visualization
 vispy

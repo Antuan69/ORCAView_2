@@ -1,4 +1,7 @@
 import sys
+import vispy
+vispy.use(app='pyqt6')  # Configure Vispy to use PyQt6 backend before other imports
+
 from PyQt6.QtWidgets import QApplication
 from orcaview.main_window import MainWindow
 

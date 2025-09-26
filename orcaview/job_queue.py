@@ -15,10 +15,9 @@ class JobStatus(Enum):
     CANCELLED = 'Cancelled'
 
 class OrcaJob:
-    def __init__(self, input_path, output_path, bat_path, orca_path=None):
+    def __init__(self, input_path, output_path, orca_path=None):
         self.input_path = input_path
         self.output_path = output_path
-        self.bat_path = bat_path
         self.orca_path = orca_path
         self.status = JobStatus.QUEUED
         self.submitted_time = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -67,6 +66,24 @@ class JobQueueManager:
                 self.queue.insert(new_index, job)
         self._trigger_update()
 
+    def remove_completed_job(self, job):
+        """Remove a completed job from the completed jobs list."""
+        with self.lock:
+            if job in self.completed_jobs and job.status in (JobStatus.DONE, JobStatus.ERROR, JobStatus.CANCELLED):
+                self.completed_jobs.remove(job)
+                self._trigger_update()
+                return True
+        return False
+
+    def remove_all_finished_jobs(self):
+        """Remove all finished jobs (DONE, ERROR, CANCELLED) from the completed jobs list."""
+        with self.lock:
+            finished_jobs = [job for job in self.completed_jobs if job.status in (JobStatus.DONE, JobStatus.ERROR, JobStatus.CANCELLED)]
+            for job in finished_jobs:
+                self.completed_jobs.remove(job)
+            self._trigger_update()
+            return len(finished_jobs)
+
     def _worker(self):
         import threading
         while not self._should_stop:
@@ -96,30 +113,26 @@ class JobQueueManager:
                     print('STEP: about to set input_dir and creationflags')
                     input_dir = os.path.dirname(job.input_path) or os.getcwd()
                     creationflags = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0
-                    print('ABOUT TO LAUNCH BATCH:', job.bat_path)
-                    print('STEP: checking platform')
-                    if sys.platform == "win32":
-                        print('USING SHELL=TRUE FOR WINDOWS')
+                    
+                    # Prepare ORCA command arguments
+                    input_filename = os.path.basename(job.input_path)
+                    orca_cmd = [job.orca_path, input_filename]
+                    
+                    print('ABOUT TO LAUNCH ORCA DIRECTLY:', orca_cmd)
+                    print('WORKING DIRECTORY:', input_dir)
+                    
+                    # Open output file for writing
+                    with open(job.output_path, 'w') as output_file:
                         job.process = subprocess.Popen(
-                            job.bat_path,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
+                            orca_cmd,
+                            stdout=output_file,
+                            stderr=subprocess.STDOUT,  # Redirect stderr to stdout (output file)
                             text=True,
                             env=env,
                             cwd=input_dir,
-                            creationflags=creationflags,
-                            shell=True
+                            creationflags=creationflags if sys.platform == "win32" else 0
                         )
-                    else:
-                        job.process = subprocess.Popen(
-                            [job.bat_path],
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            text=True,
-                            env=env,
-                            cwd=input_dir
-                        )
-                    print('BATCH LAUNCHED, WAITING FOR COMPLETION')
+                    print('ORCA LAUNCHED, WAITING FOR COMPLETION')
                     while True:
                         # Check for cancellation
                         if getattr(job, '_cancel_requested', False):
@@ -143,12 +156,9 @@ class JobQueueManager:
                             break
                         time.sleep(0.2)
                     if job.status != JobStatus.CANCELLED:
-                        stdout, stderr = job.process.communicate()
-                        print('BATCH FINISHED. RETURN CODE:', job.process.returncode)
-                        print('BATCH STDOUT:')
-                        print(stdout)
-                        print('BATCH STDERR:')
-                        print(stderr)
+                        job.process.wait()  # Ensure process is fully finished
+                        print('ORCA FINISHED. RETURN CODE:', job.process.returncode)
+                        print('OUTPUT WRITTEN TO:', job.output_path)
                         if job.process.returncode == 0:
                             job.status = JobStatus.DONE
                             job.finished_time = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -186,6 +196,8 @@ class JobQueueManager:
                     print('JOB MOVED TO COMPLETED:', job.input_path)
                     # Trigger UI update when job completes
                     self._trigger_update()
+                    # Also notify condition to wake up worker for next job
+                    self.condition.notify()
             time.sleep(0.5)
 
     def stop(self):

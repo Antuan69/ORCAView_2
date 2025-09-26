@@ -1,0 +1,203 @@
+ORCAView v2.1 - Third-Party Library Licenses
+================================================
+
+This software uses the following third-party libraries and components:
+
+1. PyQt6
+--------
+License: GPL v3 / Commercial License
+Copyright: The Qt Company Ltd.
+Website: https://www.qt.io/
+Description: Cross-platform GUI toolkit for Python applications
+
+2. PyQt6-WebEngine
+------------------
+License: GPL v3 / Commercial License
+Copyright: The Qt Company Ltd.
+Website: https://www.qt.io/
+Description: Web engine integration for PyQt6
+
+3. Flask
+--------
+License: BSD-3-Clause License
+Copyright: 2010 Pallets
+Website: https://flask.palletsprojects.com/
+Description: Lightweight WSGI web application framework
+
+4. RDKit
+--------
+License: BSD-3-Clause License
+Copyright: 2006-2023 Greg Landrum and other RDKit contributors
+Website: https://www.rdkit.org/
+Description: Cheminformatics and machine learning software toolkit
+
+5. Vispy
+--------
+License: BSD-3-Clause License
+Copyright: 2013-2023 Vispy Development Team
+Website: http://vispy.org/
+Description: High-performance interactive 2D/3D data visualization library
+
+6. NumPy
+--------
+License: BSD-3-Clause License
+Copyright: 2005-2023 NumPy Developers
+Website: https://numpy.org/
+Description: Fundamental package for scientific computing with Python
+
+7. Pygments
+-----------
+License: BSD-2-Clause License
+Copyright: 2006-2023 Georg Brandl and contributors
+Website: https://pygments.org/
+Description: Generic syntax highlighter for Python
+
+8. Pillow (PIL Fork)
+-------------------
+License: HPND License (Historical Permission Notice and Disclaimer)
+Copyright: 1997-2011 Secret Labs AB, 1995-2011 Fredrik Lundh, 2010-2023 Pillow Contributors
+Website: https://python-pillow.org/
+Description: Python Imaging Library (PIL) fork for image processing
+
+9. PyInstaller
+--------------
+License: GPL v2 / Commercial License
+Copyright: 2005-2023 PyInstaller Development Team
+Website: https://www.pyinstaller.org/
+Description: Bundles Python applications and their dependencies into standalone executables
+
+10. Ketcher
+-----------
+License: Apache License 2.0
+Copyright: 2021 EPAM Systems
+Website: https://github.com/epam/ketcher
+Description: Web-based molecule sketcher and editor
+
+DETAILED LICENSE TEXTS
+======================
+
+BSD-3-Clause License (Flask, RDKit, Vispy, NumPy)
+--------------------------------------------------
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+BSD-2-Clause License (Pygments)
+-------------------------------
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Apache License 2.0 (Ketcher)
+----------------------------
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+GPL v3 License (PyQt6, PyQt6-WebEngine)
+---------------------------------------
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+GPL v2 License (PyInstaller)
+----------------------------
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+HPND License (Pillow)
+--------------------
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation, and that the name of Secret Labs AB or the
+author not be used in advertising or publicity pertaining to
+distribution of the software without specific, written prior
+permission.
+
+SECRET LABS AB AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO
+THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS. IN NO EVENT SHALL SECRET LABS AB OR THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+NOTICE
+======
+This software may contain additional third-party components with their own
+license terms. Please refer to the individual component documentation for
+complete license information.
+
+For commercial use of GPL-licensed components (PyQt6, PyQt6-WebEngine, PyInstaller),
+commercial licenses may be required. Please consult the respective vendors for
+commercial licensing options.
+
+Last updated: 2025-01-26

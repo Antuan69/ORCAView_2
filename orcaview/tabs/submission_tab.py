@@ -45,6 +45,7 @@ class SubmissionTab(QWidget):
         submission_layout.addRow("Add Prepared Input File:", prepared_input_layout)
 
         self.generate_button = QPushButton("Generate Input")
+        self.save_only_button = QPushButton("Save Input File Only")
         self.save_button = QPushButton("Save and Submit to ORCA")
         self.output_text = QTextEdit()
         self.output_text.setReadOnly(True)
@@ -52,4 +53,5 @@ class SubmissionTab(QWidget):
 
         submission_layout.addRow(self.generate_button)
         submission_layout.addRow(self.output_text)
+        submission_layout.addRow(self.save_only_button)
         submission_layout.addRow(self.save_button)

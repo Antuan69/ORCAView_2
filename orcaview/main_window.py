@@ -5,7 +5,7 @@ import traceback
 import threading
 
 from PyQt6.QtCore import QSettings, Qt, QBuffer
-from PyQt6.QtGui import QFont, QPixmap
+from PyQt6.QtGui import QFont, QPixmap, QIcon
 from PyQt6.QtWidgets import (
     QMainWindow, QVBoxLayout, QWidget, QTabWidget, QMessageBox, QFileDialog
 )
@@ -36,6 +36,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("ORCAView - UI Redesign")
         self.setGeometry(100, 100, 800, 600)
         self.settings = QSettings("MyCompany", "ORCAView")
+        
+        # Set application icon
+        self._set_application_icon()
 
         # Central widget and layout
         self.central_widget = QWidget()
@@ -87,6 +90,9 @@ class MainWindow(QMainWindow):
         # Start the Ketcher server in a background thread
         self._start_ketcher_server()
         self._on_method_changed(initial_method)
+        
+        # Clean up any old batch files from previous versions
+        self._cleanup_old_bat_files()
 
     def _connect_signals(self):
         # Job type selection
@@ -108,6 +114,7 @@ class MainWindow(QMainWindow):
         self.coordinates_tab.draw_molecule_button.clicked.connect(self._open_ketcher_window)
         # Input generation
         self.submission_tab.generate_button.clicked.connect(self._generate_input)
+        self.submission_tab.save_only_button.clicked.connect(self._save_input_only)
         self.submission_tab.save_button.clicked.connect(self._save_and_submit)
         self.submission_tab.input_file_browse_button.clicked.connect(self._browse_for_input_file)
         self.submission_tab.output_file_browse_button.clicked.connect(self._browse_for_output_file)
@@ -355,43 +362,64 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Structure Error", "No structure has been generated yet.")
 
     def _enqueue_job(self, input_path, output_path, orca_path):
-        """Centralized method to create a batch file and queue an ORCA job."""
+        """Centralized method to validate paths and queue an ORCA job."""
         try:
-            input_dir = os.path.dirname(input_path) or os.getcwd()
-            bat_path = os.path.join(input_dir, f"_orca_job_{int(time.time())}.bat")
+            # Validate paths
+            if not os.path.isfile(orca_path):
+                QMessageBox.critical(self, "Job Error", f"ORCA executable not found at: {orca_path}")
+                return False
             
-            # Ensure paths are suitable for Windows batch files
-            orca_path_win = orca_path.replace('/', '\\')
-            input_path_win = input_path.replace('/', '\\')
-            output_path_win = output_path.replace('/', '\\')
-
-            orca_cmd = f'"{orca_path_win}" "{input_path_win}" > "{output_path_win}" 2>&1'
+            if not os.path.isfile(input_path):
+                QMessageBox.critical(self, "Job Error", f"Input file not found at: {input_path}")
+                return False
             
-            with open(bat_path, 'w') as bat_file:
-                bat_file.write(f'@echo off\n')
-                bat_file.write(f'echo Starting ORCA calculation...\n')
-                bat_file.write(f'echo ORCA Path: "{orca_path_win}"\n')
-                bat_file.write(f'echo Input File: "{input_path_win}"\n')
-                bat_file.write(f'echo Output File: "{output_path_win}"\n')
-                bat_file.write(f'if not exist "{orca_path_win}" (\n')
-                bat_file.write(f'    echo ERROR: ORCA executable not found at "{orca_path_win}"\n')
-                bat_file.write(f'    exit /b 1\n')
-                bat_file.write(f')\n')
-                bat_file.write(f'if not exist "{input_path_win}" (\n')
-                bat_file.write(f'    echo ERROR: Input file not found at "{input_path_win}"\n')
-                bat_file.write(f'    exit /b 1\n')
-                bat_file.write(f')\n')
-                bat_file.write(f'{orca_cmd}\n')
-                bat_file.write(f'set ORCA_EXIT_CODE=%ERRORLEVEL%\n')
-                bat_file.write(f'echo ORCA finished with exit code: %ORCA_EXIT_CODE%\n')
-                bat_file.write(f'exit /b %ORCA_EXIT_CODE%\n')
+            # Ensure output directory exists
+            output_dir = os.path.dirname(output_path)
+            if output_dir and not os.path.exists(output_dir):
+                os.makedirs(output_dir, exist_ok=True)
 
-            job = OrcaJob(input_path, output_path, bat_path, orca_path)
+            # Create job without batch file
+            job = OrcaJob(input_path, output_path, orca_path)
             self.job_queue_manager.add_job(job)
             return True
         except Exception as e:
             QMessageBox.critical(self, "Job Error", f"Failed to create and queue job: {e}")
             return False
+
+    def _cleanup_old_bat_files(self):
+        """Remove any old .bat files from previous versions that used batch files."""
+        try:
+            current_dir = os.getcwd()
+            for filename in os.listdir(current_dir):
+                if filename.startswith('_orca_job_') and filename.endswith('.bat'):
+                    bat_path = os.path.join(current_dir, filename)
+                    try:
+                        os.remove(bat_path)
+                        print(f"Cleaned up old batch file: {filename}")
+                    except Exception as e:
+                        print(f"Could not remove {filename}: {e}")
+        except Exception as e:
+            print(f"Error during batch file cleanup: {e}")
+
+    def _set_application_icon(self):
+        """Set the application icon for window and taskbar."""
+        try:
+            # Get the path to the icon file
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.dirname(current_dir)
+            icon_path = os.path.join(project_root, "Icon_logo.png")
+            
+            if os.path.exists(icon_path):
+                icon = QIcon(icon_path)
+                self.setWindowIcon(icon)
+                # Also set for the application (taskbar)
+                from PyQt6.QtWidgets import QApplication
+                QApplication.instance().setWindowIcon(icon)
+                print(f"Application icon set from: {icon_path}")
+            else:
+                print(f"Icon file not found at: {icon_path}")
+        except Exception as e:
+            print(f"Failed to set application icon: {e}")
 
     def _toggle_paste_xyz_input(self):
         paste_input = self.coordinates_tab.xyz_paste_input
@@ -428,6 +456,25 @@ class MainWindow(QMainWindow):
         if self._enqueue_job(input_path, output_path, orca_path):
             QMessageBox.information(self, "Job Queued", f"Job has been added to the queue.")
             self.signals.job_submitted.emit(input_path, output_path)
+
+    def _save_input_only(self):
+        """Save the input file without submitting to ORCA queue."""
+        input_text = self.submission_tab.output_text.toPlainText().strip()
+        if not input_text:
+            QMessageBox.warning(self, "Input Error", "Please generate the input file first.")
+            return
+
+        input_filename = self.submission_tab.input_file_path_input.text().strip()
+        if not input_filename:
+            QMessageBox.warning(self, "File Error", "Please specify the input file path.")
+            return
+
+        try:
+            with open(input_filename, 'w') as f:
+                f.write(input_text)
+            QMessageBox.information(self, "File Saved", f"Input file saved successfully to:\n{input_filename}")
+        except Exception as e:
+            QMessageBox.critical(self, "File Error", f"Failed to save input file: {e}")
 
     def _save_and_submit(self):
         input_text = self.submission_tab.output_text.toPlainText().strip()

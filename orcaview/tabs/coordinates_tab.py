@@ -1,4 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QFormLayout, QLineEdit, QPushButton, QLabel, QTextEdit, QHBoxLayout
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import Qt
+import os
 
 class CoordinatesTab(QWidget):
     def __init__(self, parent=None):
@@ -33,6 +36,10 @@ class CoordinatesTab(QWidget):
         self.mol_image_label.setFixedSize(300, 300)
         self.mol_image_label.setStyleSheet("border: 1px solid grey; padding: 5px;")
         self.mol_image_label.setScaledContents(True)
+        self.mol_image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        # Load and display the logo initially
+        self._load_initial_logo()
 
         # Center the 2D depiction
         image_layout = QHBoxLayout()
@@ -51,3 +58,33 @@ class CoordinatesTab(QWidget):
         coords_header_layout.addWidget(self.view_3d_button)
         coords_layout.addRow(coords_header_layout)
         coords_layout.addRow(self.coordinates_input)
+
+    def _load_initial_logo(self):
+        """Load and display the ORCAView logo in the 2D depiction area."""
+        try:
+            # Get the path to the logo file (assuming it's in the project root)
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.dirname(os.path.dirname(current_dir))
+            logo_path = os.path.join(project_root, "Icon_logo.png")
+            
+            if os.path.exists(logo_path):
+                pixmap = QPixmap(logo_path)
+                if not pixmap.isNull():
+                    # Scale the pixmap to fit the label while maintaining aspect ratio
+                    scaled_pixmap = pixmap.scaled(
+                        self.mol_image_label.size(), 
+                        Qt.AspectRatioMode.KeepAspectRatio, 
+                        Qt.TransformationMode.SmoothTransformation
+                    )
+                    self.mol_image_label.setPixmap(scaled_pixmap)
+                else:
+                    self.mol_image_label.setText("2D depiction will be shown here.")
+            else:
+                self.mol_image_label.setText("2D depiction will be shown here.")
+        except Exception as e:
+            print(f"Failed to load logo: {e}")
+            self.mol_image_label.setText("2D depiction will be shown here.")
+
+    def reset_to_logo(self):
+        """Reset the 2D depiction area to show the logo."""
+        self._load_initial_logo()

@@ -111,6 +111,88 @@ class JobQueueTab(QWidget):
         self.queue_manager.reorder_job(job, new_index)
         self.refresh()
 
+    def _remove_finished_job(self, job):
+        """Remove a finished job from the queue with confirmation."""
+        job_name = os.path.basename(job.input_path) if job.input_path else "Unknown Job"
+        status_text = job.status.value
+        
+        reply = QMessageBox.question(
+            self, 
+            "Remove Finished Job", 
+            f"Are you sure you want to remove this {status_text.lower()} job?\n\n"
+            f"Job: {job_name}\n"
+            f"Status: {status_text}\n\n"
+            f"This action cannot be undone.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            success = self.queue_manager.remove_completed_job(job)
+            if success:
+                self.refresh()
+                QMessageBox.information(
+                    self, 
+                    "Job Removed", 
+                    f"The {status_text.lower()} job has been removed from the queue."
+                )
+            else:
+                QMessageBox.warning(
+                    self, 
+                    "Remove Failed", 
+                    "Unable to remove this job. It may not be in a finished state."
+                )
+
+    def _remove_all_finished_jobs(self):
+        """Remove all finished jobs from the queue with confirmation."""
+        finished_jobs = [job for job in self.jobs if job.status in (JobStatus.DONE, JobStatus.ERROR, JobStatus.CANCELLED)]
+        
+        if not finished_jobs:
+            QMessageBox.information(self, "No Finished Jobs", "There are no finished jobs to remove.")
+            return
+        
+        # Count jobs by status for the confirmation dialog
+        done_count = sum(1 for job in finished_jobs if job.status == JobStatus.DONE)
+        error_count = sum(1 for job in finished_jobs if job.status == JobStatus.ERROR)
+        cancelled_count = sum(1 for job in finished_jobs if job.status == JobStatus.CANCELLED)
+        
+        status_breakdown = []
+        if done_count > 0:
+            status_breakdown.append(f"{done_count} completed")
+        if error_count > 0:
+            status_breakdown.append(f"{error_count} failed")
+        if cancelled_count > 0:
+            status_breakdown.append(f"{cancelled_count} cancelled")
+        
+        status_text = ", ".join(status_breakdown)
+        total_count = len(finished_jobs)
+        
+        reply = QMessageBox.question(
+            self, 
+            "Remove All Finished Jobs", 
+            f"Are you sure you want to remove all {total_count} finished jobs?\n\n"
+            f"This includes: {status_text}\n\n"
+            f"This action cannot be undone.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            removed_count = self.queue_manager.remove_all_finished_jobs()
+            if removed_count > 0:
+                self.refresh()
+                QMessageBox.information(
+                    self, 
+                    "Jobs Removed", 
+                    f"Successfully removed {removed_count} finished jobs from the queue."
+                )
+            else:
+                QMessageBox.warning(
+                    self, 
+                    "Remove Failed", 
+                    "No finished jobs were removed. They may have changed status."
+                )
+
     def _show_context_menu(self, pos: QPoint):
         index = self.table.indexAt(pos)
         row = index.row()
@@ -138,6 +220,23 @@ class JobQueueTab(QWidget):
             monitor_action = QAction("Monitor Output File", self)
             monitor_action.triggered.connect(lambda: self._monitor_output_file(job))
             menu.addAction(monitor_action)
+        # Remove Finished Job
+        if job.status in (JobStatus.DONE, JobStatus.ERROR, JobStatus.CANCELLED):
+            if menu.actions():  # Add separator if there are other actions
+                menu.addSeparator()
+            remove_action = QAction("Remove Finished Job", self)
+            remove_action.triggered.connect(lambda: self._remove_finished_job(job))
+            menu.addAction(remove_action)
+        
+        # Remove All Finished Jobs (show if there are any finished jobs)
+        finished_jobs_count = sum(1 for j in self.jobs if j.status in (JobStatus.DONE, JobStatus.ERROR, JobStatus.CANCELLED))
+        if finished_jobs_count > 1:  # Only show if there are multiple finished jobs
+            if menu.actions():  # Add separator if there are other actions
+                menu.addSeparator()
+            remove_all_action = QAction(f"Remove All Finished Jobs ({finished_jobs_count})", self)
+            remove_all_action.triggered.connect(self._remove_all_finished_jobs)
+            menu.addAction(remove_all_action)
+        
         menu.exec(self.table.viewport().mapToGlobal(pos))
 
     def _monitor_output_file(self, job):

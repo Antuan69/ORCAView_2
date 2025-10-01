@@ -107,16 +107,18 @@ class JobQueueManager:
                     print('STEP: about to set up env')
                     env = os.environ.copy()
                     if job.orca_path:
-                        orca_dir = os.path.dirname(job.orca_path)
+                        orca_dir = os.path.dirname(os.path.abspath(job.orca_path))
                         old_path = env.get('PATH', '')
                         env['PATH'] = orca_dir + os.pathsep + old_path
                     print('STEP: about to set input_dir and creationflags')
-                    input_dir = os.path.dirname(job.input_path) or os.getcwd()
+                    input_dir = os.path.dirname(os.path.abspath(job.input_path))
                     creationflags = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0
                     
                     # Prepare ORCA command arguments
-                    # Use full path to input file for parallel job support
-                    orca_cmd = [job.orca_path, job.input_path]
+                    # Use full absolute paths for both ORCA executable and input file for parallel job support
+                    orca_executable = os.path.abspath(job.orca_path)
+                    input_file = os.path.abspath(job.input_path)
+                    orca_cmd = [orca_executable, input_file]
                     
                     print('ABOUT TO LAUNCH ORCA DIRECTLY:', orca_cmd)
                     print('WORKING DIRECTORY:', input_dir)

@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QFormLayout, QComboBox, QStackedWidget, QTextEdit, QVBoxLayout, QLabel
 from PyQt6.QtCore import Qt
-from ..method_info import DFT_FUNCTIONAL_INFO, BASIS_SET_INFO, SEMIEMPIRICAL_INFO, XTB_INFO, METHOD_RECOMMENDATIONS
+from ..method_info import DFT_FUNCTIONAL_INFO, BASIS_SET_INFO, SEMIEMPIRICAL_INFO, XTB_INFO, DISPERSION_INFO, METHOD_RECOMMENDATIONS
 
 class MethodTab(QWidget):
     def __init__(self, methods, dft_functionals, basis_sets, semiempirical_methods, xtb_methods, parent=None):
@@ -65,6 +65,7 @@ class MethodTab(QWidget):
         # Connect DFT combo boxes to info updates
         self.dft_functional_combo.currentTextChanged.connect(self._update_dft_info)
         self.dft_basis_set_combo.currentTextChanged.connect(self._update_dft_info)
+        self.dispersion_combo.currentTextChanged.connect(self._update_dft_info)
         
         self.method_stack.addWidget(self.dft_pane)
 
@@ -190,7 +191,7 @@ class MethodTab(QWidget):
         
         # Text area for information
         info_text = QTextEdit()
-        info_text.setMaximumHeight(100)
+        info_text.setMaximumHeight(140)  # Increased from 100px to 140px
         info_text.setReadOnly(True)
         info_text.setStyleSheet("""
             QTextEdit {
@@ -229,6 +230,7 @@ class MethodTab(QWidget):
         """Update information display for DFT method."""
         functional = self.dft_functional_combo.currentText()
         basis_set = self.dft_basis_set_combo.currentText()
+        dispersion = self.dispersion_combo.currentText()
         
         info_text = ""
         
@@ -244,6 +246,10 @@ class MethodTab(QWidget):
         if basis_set in BASIS_SET_INFO:
             info_text += f"**{basis_set} Basis Set:**\n{BASIS_SET_INFO[basis_set]}\n\n"
         
+        # Add dispersion correction information
+        if dispersion and dispersion in DISPERSION_INFO:
+            info_text += f"**{dispersion} Dispersion:**\n{DISPERSION_INFO[dispersion]}\n\n"
+        
         # Add general recommendations
         info_text += "**General Recommendations:**\n"
         for application, recommendation in METHOD_RECOMMENDATIONS.items():
@@ -251,7 +257,7 @@ class MethodTab(QWidget):
                 info_text += f"• {application}: {recommendation}\n"
         
         if not info_text.strip():
-            info_text = f"Information for {functional} functional and {basis_set} basis set is not available in the database."
+            info_text = f"Information for {functional} functional, {basis_set} basis set, and {dispersion} dispersion is not available in the database."
         
         self.dft_info_widget.text_widget.setPlainText(info_text)
 

@@ -143,6 +143,17 @@ XTB_INFO = {
     "GFN-FF": "GFN force field. Ultra-fast for very large systems. Limited accuracy.",
 }
 
+DISPERSION_INFO = {
+    "None": "No dispersion correction applied. Suitable for systems where van der Waals interactions are not important or when using functionals with built-in dispersion (e.g., B97M-V, ωB97M-V).",
+    "D2": "Grimme's D2 dispersion correction. Simple pairwise C6/R^6 correction. Less accurate than D3/D4 but computationally cheap. Good for quick estimates.",
+    "D3": "Grimme's D3 dispersion correction. Improved over D2 with coordination-number dependent C6 coefficients. Standard choice for many applications. More accurate than D2.",
+    "D3BJ": "D3 with Becke-Johnson damping. Often more accurate than standard D3, especially for short-range interactions. Recommended over plain D3 for most functionals.",
+    "D3ZERO": "D3 with zero damping function. Alternative damping scheme to BJ damping. Good performance for many systems, especially with specific functionals.",
+    "D4": "Latest Grimme dispersion correction. Most accurate dispersion method. Includes charge-dependent coefficients and improved damping. Recommended for high-accuracy calculations.",
+    "VV10": "Vydrov-Van Voorhis non-local correlation functional. Built into some functionals (B97M-V, ωB97M-V). Handles both medium and long-range dispersion.",
+    "NOVDW": "Explicitly disable all dispersion corrections. Useful when comparing with/without dispersion or when using functionals that already include dispersion effects."
+}
+
 METHOD_RECOMMENDATIONS = {
     "Organic Chemistry": "B3LYP/6-31G(d,p) or PBE0/def2-TZVP for higher accuracy",
     "Inorganic Chemistry": "PBE0/def2-TZVP or TPSS/def2-TZVP for transition metals",

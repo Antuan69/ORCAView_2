@@ -55,9 +55,12 @@ class MethodTab(QWidget):
         
         dft_main_layout.addWidget(dft_controls)
         
-        # DFT Information viewer
+        # DFT Information viewer - positioned right after controls
         self.dft_info_widget = self._create_info_viewer()
         dft_main_layout.addWidget(self.dft_info_widget)
+        
+        # Add stretch to push info viewer up
+        dft_main_layout.addStretch()
         
         # Connect DFT combo boxes to info updates
         self.dft_functional_combo.currentTextChanged.connect(self._update_dft_info)
@@ -93,9 +96,12 @@ class MethodTab(QWidget):
         
         hf_main_layout.addWidget(hf_controls)
         
-        # HF Information viewer
+        # HF Information viewer - positioned right after controls
         self.hf_info_widget = self._create_info_viewer()
         hf_main_layout.addWidget(self.hf_info_widget)
+        
+        # Add stretch to push info viewer up
+        hf_main_layout.addStretch()
         
         # Connect HF combo box to info updates
         self.hf_basis_set_combo.currentTextChanged.connect(self._update_hf_info)
@@ -117,9 +123,12 @@ class MethodTab(QWidget):
         
         semi_main_layout.addWidget(semi_controls)
         
-        # Semi-empirical Information viewer
+        # Semi-empirical Information viewer - positioned right after controls
         self.semi_info_widget = self._create_info_viewer()
         semi_main_layout.addWidget(self.semi_info_widget)
+        
+        # Add stretch to push info viewer up
+        semi_main_layout.addStretch()
         
         # Connect semi-empirical combo box to info updates
         self.semiempirical_combo.currentTextChanged.connect(self._update_semi_info)
@@ -141,9 +150,12 @@ class MethodTab(QWidget):
         
         xtb_main_layout.addWidget(xtb_controls)
         
-        # xTB Information viewer
+        # xTB Information viewer - positioned right after controls
         self.xtb_info_widget = self._create_info_viewer()
         xtb_main_layout.addWidget(self.xtb_info_widget)
+        
+        # Add stretch to push info viewer up
+        xtb_main_layout.addStretch()
         
         # Connect xTB combo box to info updates
         self.xtb_combo.currentTextChanged.connect(self._update_xtb_info)
@@ -158,27 +170,51 @@ class MethodTab(QWidget):
         self.method_combo.currentTextChanged.connect(self._on_method_changed)
 
     def _create_info_viewer(self):
-        """Create an information viewer widget."""
+        """Create an information viewer widget with dark theme styling."""
         info_widget = QWidget()
         info_layout = QVBoxLayout(info_widget)
+        info_layout.setContentsMargins(0, 8, 0, 0)  # Small top margin for spacing
         
         # Title label
         title_label = QLabel("Method Information")
-        title_label.setStyleSheet("font-weight: bold; font-size: 12px; color: #2c3e50;")
+        title_label.setStyleSheet("""
+            QLabel {
+                font-weight: bold; 
+                font-size: 11px; 
+                color: #ffffff;
+                background-color: transparent;
+                padding: 4px 8px;
+            }
+        """)
         info_layout.addWidget(title_label)
         
         # Text area for information
         info_text = QTextEdit()
-        info_text.setMaximumHeight(120)
+        info_text.setMaximumHeight(100)
         info_text.setReadOnly(True)
         info_text.setStyleSheet("""
             QTextEdit {
-                background-color: #f8f9fa;
-                border: 1px solid #dee2e6;
+                background-color: #3c3c3c;
+                border: 1px solid #555555;
                 border-radius: 4px;
                 padding: 8px;
-                font-size: 11px;
-                line-height: 1.4;
+                font-size: 10px;
+                line-height: 1.3;
+                color: #e0e0e0;
+                selection-background-color: #0078d4;
+            }
+            QScrollBar:vertical {
+                background-color: #2b2b2b;
+                width: 12px;
+                border-radius: 6px;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #555555;
+                border-radius: 6px;
+                min-height: 20px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: #666666;
             }
         """)
         info_text.setPlainText("Select a method to see detailed information about its properties, applicability, and recommendations.")

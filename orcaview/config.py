@@ -58,50 +58,73 @@ DFT_FUNCTIONALS = {
 
 BASIS_SETS = {
     "Pople": [
-        "STO-3G", "3-21G", "6-31G", "6-31G(d)", "6-31G(d,p)", "6-31+G(d)", 
-        "6-31++G(d,p)", "6-311G", "6-311G(d)", "6-311G(d,p)", "6-311+G(d)", 
-        "6-311++G(d,p)"
+        "STO-3G", "3-21G", "3-21GSP", "4-22GSP", "6-31G", "6-31G*", "6-31G**", 
+        "6-31G(d)", "6-31G(d,p)", "6-31G(2d)", "6-31G(2d,p)", "6-31G(2d,2p)", 
+        "6-31G(2df)", "6-31G(2df,2p)", "6-31G(2df,2pd)", "6-31+G*", "6-31+G**", 
+        "6-31+G(d)", "6-31+G(d,p)", "6-31+G(2d)", "6-31+G(2d,p)", "6-31+G(2d,2p)", 
+        "6-31+G(2df)", "6-31+G(2df,2p)", "6-31+G(2df,2pd)", "6-31++G**", 
+        "6-31++G(d,p)", "6-31++G(2d,p)", "6-31++G(2d,2p)", "6-31++G(2df,2p)", 
+        "6-31++G(2df,2pd)", "6-311G", "6-311G*", "6-311G**", "6-311G(d)", 
+        "6-311G(d,p)", "6-311G(2d)", "6-311G(2d,p)", "6-311G(2d,2p)", 
+        "6-311G(2df)", "6-311G(2df,2p)", "6-311G(2df,2pd)", "6-311G(3df)", 
+        "6-311G(3df,3pd)", "6-311+G*", "6-311+G**", "6-311+G(d)", "6-311+G(d,p)", 
+        "6-311+G(2d)", "6-311+G(2d,p)", "6-311+G(2d,2p)", "6-311+G(2df)", 
+        "6-311+G(2df,2p)", "6-311+G(2df,2pd)", "6-311+G(3df)", "6-311+G(3df,2p)", 
+        "6-311+G(3df,3pd)", "6-311++G**", "6-311++G(d,p)", "6-311++G(2d,p)", 
+        "6-311++G(2d,2p)", "6-311++G(2df,2p)", "6-311++G(2df,2pd)", "6-311++G(3df,3pd)", 
+        "m6-31G", "m6-31G*"
     ],
-    "Dunning": [
-        "cc-pVDZ", "cc-pVTZ", "cc-pVQZ", "cc-pV5Z", "cc-pV6Z",
-        "aug-cc-pVDZ", "aug-cc-pVTZ", "aug-cc-pVQZ", "aug-cc-pV5Z", "aug-cc-pV6Z",
-        "d-aug-cc-pVDZ",
-        "cc-pCVDZ", "cc-pCVTZ", "cc-pCVQZ", "cc-pCV5Z",
-        "aug-cc-pCVDZ", "aug-cc-pCVTZ", "aug-cc-pCVQZ",
-        "cc-pwCVDZ", "cc-pwCVTZ", "cc-pwCVQZ",
-        "aug-cc-pwCVTZ", "aug-cc-pwCVQZ", "aug-cc-pwCV5Z",
-        "cc-pVDZ-DK", "cc-pVTZ-DK", "cc-pVQZ-DK",
-        "cc-pVDZ-F12", "cc-pVTZ-F12", "cc-pVQZ-F12"
+    "Karlsruhe def2": [
+        "def2-SVP", "def2-SV(P)", "def2-TZVP", "def2-TZVP(-f)", "def2-TZVPP", 
+        "def2-QZVP", "def2-QZVPP", "def2-SVPD", "def2-TZVPD", "def2-TZVPPD", 
+        "def2-QZVPD", "def2-QZVPPD", "ma-def2-SVP", "ma-def2-SV(P)", "ma-def2-mSVP", 
+        "ma-def2-TZVP", "ma-def2-TZVP(-f)", "ma-def2-TZVPP", "ma-def2-QZVPP"
     ],
-    "Karlsruhe/Ahlrichs": [
-        "VDZ", "TZV", "TZVP", "QZVP",
-        "def2-SVP", "def2-SVPD", "def2-TZVP", "def2-TZVPD", "def2-TZVPP", 
-        "def2-TZVPPD", "def2-QZVP", "def2-QZVPD", "def2-QZVPP", "def2-QZVPPD",
-        "ma-def2-SVP", "ma-def2-TZVP", "ma-def2-TZVPP", "ma-def2-QZVPP",
-        "dhf-SV(P)", "dhf-SVP", "dhf-TZVP", "dhf-TZVPP", "dhf-QZVP", "dhf-QZVPP",
-        "dhf-SVP-2c", "dhf-TZVP-2c", "dhf-TZVPP-2c", "dhf-QZVP-2c", "dhf-QZVPP-2c"
+    "Correlation-Consistent (Dunning)": [
+        "cc-pVDZ", "cc-pVTZ", "cc-pVQZ", "cc-pV5Z", "cc-pV6Z", "aug-cc-pVDZ", 
+        "aug-cc-pVTZ", "aug-cc-pVQZ", "aug-cc-pV5Z", "aug-cc-pV6Z", "cc-pVD(+d)Z", 
+        "cc-pVT(+d)Z", "cc-pVQ(+d)Z", "cc-pV5(+d)Z", "aug-cc-pVD(+d)Z", 
+        "aug-cc-pVT(+d)Z", "aug-cc-pVQ(+d)Z", "aug-cc-pV5(+d)Z", "aug-cc-pV6(+d)Z", 
+        "apr-cc-pV(Q+d)Z", "may-cc-pV(T+d)Z", "may-cc-pV(Q+d)Z", "jun-cc-pV(D+d)Z", 
+        "jun-cc-pV(T+d)Z", "jun-cc-pV(Q+d)Z", "jul-cc-pV(D+d)Z", "jul-cc-pV(T+d)Z", 
+        "jul-cc-pV(Q+d)Z", "maug-cc-pV(D+d)Z", "maug-cc-pV(T+d)Z", "maug-cc-pV(Q+d)Z", 
+        "cc-pCVDZ", "cc-pCVTZ", "cc-pCVQZ", "cc-pCV5Z", "cc-pCV6Z", "aug-cc-pCVDZ", 
+        "aug-cc-pCVTZ", "aug-cc-pCVQZ", "aug-cc-pCV5Z", "aug-cc-pCV6Z"
     ],
-    "Jensen": [
-        "pc-0", "pc-1", "pc-2", "pc-3", "pc-4",
-        "aug-pc-0", "aug-pc-1", "aug-pc-2", "aug-pc-3", "aug-pc-4",
-        "pcS-0", "pcS-1", "pcS-2", "pcS-3", "pcS-4",
-        "pcJ-0", "pcJ-1", "pcJ-2", "pcJ-3", "pcJ-4"
+    "Jensen (Polarization-Consistent)": [
+        "pc-0", "pc-1", "pc-2", "pc-3", "pc-4", "aug-pc-0", "aug-pc-1", "aug-pc-2", 
+        "aug-pc-3", "aug-pc-4", "pcseg-0", "pcseg-1", "pcseg-2", "pcseg-3", "pcseg-4", 
+        "aug-pcseg-0", "aug-pcseg-1", "aug-pcseg-2", "aug-pcseg-3", "aug-pcseg-4", 
+        "pcSseg-0", "pcSseg-1", "pcSseg-2", "pcSseg-3", "pcSseg-4", "aug-pcSseg-0", 
+        "aug-pcSseg-1", "aug-pcSseg-2", "aug-pcSseg-3", "aug-pcSseg-4", "pcJ-0", 
+        "pcJ-1", "pcJ-2", "pcJ-3", "pcJ-4", "aug-pcJ-0", "aug-pcJ-1", "aug-pcJ-2", 
+        "aug-pcJ-3", "aug-pcJ-4", "pcH-1", "pcH-2", "pcH-3", "pcH-4", "aug-pcH-1", 
+        "aug-pcH-2", "aug-pcH-3", "aug-pcH-4", "pcX-1", "pcX-2", "pcX-3", "pcX-4", 
+        "aug-pcX-1", "aug-pcX-2", "aug-pcX-3", "aug-pcX-4"
     ],
-    "Sapporo": [
-        "Sapporo-DZP-2012", "Sapporo-TZP-2012", "Sapporo-QZP-2012",
-        "Sapporo-DKH3-DZP-2012", "Sapporo-DKH3-TZP-2012", "Sapporo-DKH3-QZP-2012"
+    "Atomic Natural Orbitals (ANO)": [
+        "ANO-SZ", "ANO-pVDZ", "ANO-pVTZ", "ANO-pVQZ", "ANO-pV5Z", "ANO-pV6Z", 
+        "aug-ANO-pVDZ", "aug-ANO-pVTZ", "aug-ANO-pVQZ", "aug-ANO-pV5Z", 
+        "saug-ANO-pVDZ", "saug-ANO-pVTZ", "saug-ANO-pVQZ", "saug-ANO-pV5Z"
     ],
-    "ANO": [
-        "ANO-SZ", "ANO-pVDZ", "ANO-pVTZ", "ANO-pVQZ", "ANO-pV5Z", "ANO-pV6Z",
-        "aug-ANO-pVDZ", "aug-ANO-pVTZ", "aug-ANO-pVQZ", "aug-ANO-pV5Z",
-        "saug-ANO-pVDZ", "saug-ANO-pVTZ", "saug-ANO-pVQZ"
+    "Relativistic (DKH/ZORA)": [
+        "DKH-SV(P)", "DKH-SVP", "DKH-TZV(P)", "DKH-TZVP", "DKH-TZVPP", "DKH-QZVP", 
+        "DKH-QZVPP", "ZORA-SV(P)", "ZORA-SVP", "ZORA-TZV(P)", "ZORA-TZVP", 
+        "ZORA-TZVPP", "ZORA-QZVP", "ZORA-QZVPP", "DKH-def2-SVP", "DKH-def2-SV(P)", 
+        "DKH-def2-TZVP", "DKH-def2-TZVP(-f)", "DKH-def2-TZVPP", "DKH-def2-QZVPP", 
+        "ZORA-def2-SVP", "ZORA-def2-SV(P)", "ZORA-def2-TZVP", "ZORA-def2-TZVP(-f)", 
+        "ZORA-def2-TZVPP", "ZORA-def2-QZVPP", "ma-DKH-def2-SVP", "ma-DKH-def2-SV(P)", 
+        "ma-DKH-def2-TZVP", "ma-DKH-def2-TZVP(-f)", "ma-DKH-def2-TZVPP", 
+        "ma-DKH-def2-QZVPP", "ma-ZORA-def2-SVP", "ma-ZORA-def2-SV(P)", 
+        "ma-ZORA-def2-TZVP", "ma-ZORA-def2-TZVP(-f)", "ma-ZORA-def2-TZVPP", 
+        "ma-ZORA-def2-QZVPP"
     ],
-    "ECP": [
-        "LANL2MB", "LANL2DZ", "CRENBS", "CRENBL", "SDD"
+    "SARC (Heavy Elements)": [
+        "SARC-DKH-SVP", "SARC-DKH-TZVP", "SARC-DKH-TZVPP", "SARC-ZORA-SVP", 
+        "SARC-ZORA-TZVP", "SARC-ZORA-TZVPP", "SARC2-DKH-QZV", "SARC2-ZORA-QZV"
     ],
-    "Relativistic": [
-        "SARC-SVP", "SARC-TZVP", "SARC-QZVP",
-        "x2c-SVPall", "x2c-TZVPall", "x2c-QZVPall"
+    "Effective Core Potentials": [
+        "LANL2MB", "LANL2DZ", "CRENBS", "CRENBL", "SDD", "def2-ECP"
     ]
 }
 

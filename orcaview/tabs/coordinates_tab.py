@@ -3,6 +3,8 @@ from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt
 import os
 
+from ..logger import logger
+
 class CoordinatesTab(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -82,7 +84,7 @@ class CoordinatesTab(QWidget):
             else:
                 self.mol_image_label.setText("2D depiction will be shown here.")
         except Exception as e:
-            print(f"Failed to load logo: {e}")
+            logger.error(f"Failed to load logo: {e}")
             self.mol_image_label.setText("2D depiction will be shown here.")
 
     def reset_to_logo(self):

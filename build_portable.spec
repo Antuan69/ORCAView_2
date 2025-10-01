@@ -1,4 +1,4 @@
-# build_portable.spec
+# build_portable.spec - Optimized for smaller size
 # -*- mode: python ; coding: utf-8 -*-
 
 import sys
@@ -6,26 +6,51 @@ from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 block_cipher = None
 
-# --- Collect all necessary data files and hidden imports ---
-# This ensures all plugins, shaders, fonts, and DLLs are included.
+# --- Collect only essential data files ---
 datas = []
-# Vispy: Include GLSL shaders, fonts, and any other data.
-datas += collect_data_files('vispy', include_py_files=True)
+# Vispy: Only essential shaders and data
+datas += collect_data_files('vispy', includes=['**/*.vert', '**/*.frag', '**/*.glsl'])
 
-# PyQt6: Ensure all Qt plugins (especially platform plugins) are found.
-datas += collect_data_files('PyQt6', include_py_files=True)
+# PyQt6: Only platform plugins
+datas += collect_data_files('PyQt6', includes=['Qt6/plugins/platforms/*'])
 
-# RDKit: RDKit needs its data files to function correctly.
-datas += collect_data_files('rdkit', include_py_files=True)
+# RDKit: Only essential data files
+datas += collect_data_files('rdkit', includes=['**/*.txt', '**/*.mol'])
 
-# Hidden imports for libraries that PyInstaller might miss.
+# Hidden imports - minimized list
 hiddenimports = [
     'PyQt6.sip',
     'vispy.app.backends._pyqt6',
-    'rdkit.Chem.Draw.MolDrawing',
-] 
-hiddenimports += collect_submodules('vispy.visuals')
-hiddenimports += collect_submodules('vispy.scene.visuals')
+    'vispy.visuals.line',
+    'vispy.visuals.markers',
+    'vispy.visuals.mesh',
+    'vispy.scene.visuals.line',
+    'vispy.scene.visuals.markers', 
+    'vispy.scene.visuals.mesh'
+]
+
+# Exclude unnecessary modules to reduce size
+excludes = [
+    'PySide6',
+    'tkinter',
+    'matplotlib',
+    'IPython',
+    'jupyter',
+    'notebook',
+    'scipy',
+    'pandas',
+    'PIL.ImageQt',
+    'PyQt6.QtMultimedia',
+    'PyQt6.QtMultimediaWidgets',
+    'PyQt6.QtBluetooth',
+    'PyQt6.QtNfc',
+    'PyQt6.QtPositioning',
+    'PyQt6.QtSensors',
+    'PyQt6.QtSerialPort',
+    'PyQt6.QtSql',
+    'PyQt6.QtTest',
+    'PyQt6.QtXml'
+]
 
 a = Analysis(
     ['main.py'],
@@ -36,12 +61,18 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['PySide6'],
+    excludes=excludes,
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
     noarchive=False,
 )
+
+# Remove duplicate and unnecessary files
+a.datas = [x for x in a.datas if not any(exclude in x[0].lower() for exclude in [
+    'test', 'example', 'demo', 'doc', 'readme', '.md', '.txt'
+])]
+
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
@@ -52,9 +83,9 @@ exe = EXE(
     name='ORCAView',
     debug=False,
     bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    console=False, # Set to True for debugging, False for release
+    strip=True,  # Strip debug symbols
+    upx=True,    # Compress with UPX
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
@@ -67,8 +98,12 @@ coll = COLLECT(
     a.binaries,
     a.zipfiles,
     a.datas,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
+    strip=True,   # Strip debug symbols from binaries
+    upx=True,     # Compress binaries with UPX
+    upx_exclude=[
+        'vcruntime140.dll',
+        'msvcp140.dll',
+        'api-ms-win-*.dll'
+    ],
     name='ORCAView',
 )

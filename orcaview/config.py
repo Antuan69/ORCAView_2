@@ -11,7 +11,6 @@ JOB_TYPES = {
     "Geometry Optimization": "Opt",
     "Frequency Analysis": "Freq",
     "Transition State Search": "OptTS",
-    "Composite Methods": "",
     "NEB": "NEB",
     "IRC": "IRC",
     "GOAT": "GOAT"

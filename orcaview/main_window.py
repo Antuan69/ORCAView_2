@@ -1,6 +1,5 @@
 import sys
 import os
-import time
 import traceback
 import threading
 
@@ -14,6 +13,7 @@ from rdkit import Chem
 from rdkit.Chem import Draw, AllChem
 
 from . import config
+from .logger import logger
 from .tabs.job_type_tab import JobTypeTab
 from .tabs.method_tab import MethodTab
 from .tabs.solvation_tab import SolvationTab
@@ -189,7 +189,7 @@ class MainWindow(QMainWindow):
                 rdDetermineBonds.DetermineConnectivity(mol)
                 Chem.SanitizeMol(mol)
             except Exception as bond_error:
-                print(f"Could not infer bonds: {bond_error}")
+                logger.debug(f"Could not infer bonds: {bond_error}")
                 # Fallback to the molecule without bonds if inference fails
 
             self._update_ui_with_molecule(mol)
@@ -218,7 +218,7 @@ class MainWindow(QMainWindow):
             pixmap.loadFromData(buffer.data(), "PNG")
             self.coordinates_tab.mol_image_label.setPixmap(pixmap)
         except Exception as e:
-            print(f"Failed to generate 2D depiction: {e}")
+            logger.error(f"Failed to generate 2D depiction: {e}")
             self.coordinates_tab.mol_image_label.setText("2D depiction failed.")
 
         # Update 3D coordinates text
@@ -395,11 +395,11 @@ class MainWindow(QMainWindow):
                     bat_path = os.path.join(current_dir, filename)
                     try:
                         os.remove(bat_path)
-                        print(f"Cleaned up old batch file: {filename}")
+                        logger.debug(f"Cleaned up old batch file: {filename}")
                     except Exception as e:
-                        print(f"Could not remove {filename}: {e}")
+                        logger.warning(f"Could not remove {filename}: {e}")
         except Exception as e:
-            print(f"Error during batch file cleanup: {e}")
+            logger.error(f"Error during batch file cleanup: {e}")
 
     def _set_application_icon(self):
         """Set the application icon for window and taskbar."""
@@ -415,11 +415,11 @@ class MainWindow(QMainWindow):
                 # Also set for the application (taskbar)
                 from PyQt6.QtWidgets import QApplication
                 QApplication.instance().setWindowIcon(icon)
-                print(f"Application icon set from: {icon_path}")
+                logger.debug(f"Application icon set from: {icon_path}")
             else:
-                print(f"Icon file not found at: {icon_path}")
+                logger.warning(f"Icon file not found at: {icon_path}")
         except Exception as e:
-            print(f"Failed to set application icon: {e}")
+            logger.error(f"Failed to set application icon: {e}")
 
     def _toggle_paste_xyz_input(self):
         paste_input = self.coordinates_tab.xyz_paste_input

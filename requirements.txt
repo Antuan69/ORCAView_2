@@ -1,24 +1,20 @@
-# ORCAView v2.2 Dependencies
+# ORCAView v2.3 Dependencies - Optimized for Performance & Size
 # Core application framework
-PyQt6>=6.5.0
+PyQt6>=6.6.0
 
 # Web-based features for Ketcher molecular editor
-PyQt6-WebEngine>=6.5.0
-Flask>=2.3.0
+PyQt6-WebEngine>=6.6.0
+Flask>=3.0.0
 
 # Cheminformatics and molecule handling
-# Note: Using rdkit instead of rdkit-pypi for better compatibility
-rdkit>=2023.3.0
+rdkit>=2023.9.0
 
 # 3D visualization and scientific computing
-vispy>=0.12.0
-numpy<2.0
+vispy>=0.14.0
+numpy>=1.24.0,<2.0
 
 # For syntax highlighting in input blocks
-Pygments>=2.15.0
+Pygments>=2.16.0
 
-# Image processing for icon handling
-Pillow>=9.5.0
-
-# For building portable applications
-pyinstaller>=5.13.0
+# For building portable applications (dev dependency)
+# pyinstaller>=6.0.0

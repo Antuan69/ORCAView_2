@@ -307,7 +307,7 @@ class MainWindow(QMainWindow):
             elif method == "HF":
                 keyword_parts.append("HF")
                 keyword_parts.append(basis_set if not basis_set.startswith("---") else "def2-SVP")
-            elif method == "Semi-Empirical":
+            elif method == "Semiempirical":
                 keyword_parts.append(config.SEMIEMPIRICAL_METHODS.get(se_method, ""))
             elif method == "xTB":
                 keyword_parts.append(config.XTB_METHODS.get(xtb_method, ""))
@@ -511,7 +511,7 @@ class MainWindow(QMainWindow):
         if method == "xTB":
             models = config.SOLVATION_MODELS.get("xTB", [])
             relevant_models = {"xTB": models}
-        elif method in ["DFT", "HF", "Semi-Empirical"]:
+        elif method in ["DFT", "HF", "Semiempirical"]:
             models = config.SOLVATION_MODELS.get("Other", [])
             relevant_models = {"Other": models}
         else:

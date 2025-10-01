@@ -1,4 +1,4 @@
-# ORCAView v2.1 Dependencies
+# ORCAView v2.2 Dependencies
 # Core application framework
 PyQt6>=6.5.0
 

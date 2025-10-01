@@ -115,8 +115,8 @@ class JobQueueManager:
                     creationflags = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0
                     
                     # Prepare ORCA command arguments
-                    input_filename = os.path.basename(job.input_path)
-                    orca_cmd = [job.orca_path, input_filename]
+                    # Use full path to input file for parallel job support
+                    orca_cmd = [job.orca_path, job.input_path]
                     
                     print('ABOUT TO LAUNCH ORCA DIRECTLY:', orca_cmd)
                     print('WORKING DIRECTORY:', input_dir)

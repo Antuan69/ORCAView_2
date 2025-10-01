@@ -1,4 +1,4 @@
-# ORCAView v2.1
+# ORCAView v2.2
 
 A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program](https://orcaforum.kofo.mpg.de/). ORCAView simplifies the process of creating, running, and analyzing ORCA calculations with a professional, feature-rich interface.
 
@@ -18,30 +18,29 @@ A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program]
     - Cancel running jobs and manage the queue order.
     - Remove individual finished jobs or bulk remove all finished jobs via context menu.
     - View live output files for running calculations.
-- **Flexible Input Generation:** Supports a wide variety of ORCA methods, basis sets, solvation models, and keywords.
+- **Flexible Input Generation:** Supports comprehensive ORCA method coverage including 80+ DFT functionals, 100+ basis sets, all ORCA 6.1 semiempirical methods, xTB methods, solvation models, and custom keywords.
 - **Save Input File Only:** New option to save generated ORCA input files without submitting to job queue.
 - **Custom Input Blocks:** A dedicated tab to add any of the official ORCA input blocks (%geom, %casscf, etc.) with custom keywords, providing advanced control over the calculation.
 - **Ketcher Molecular Editor:** Draw molecules in a 2D editor and import them directly into the coordinates tab. The editor is launched via the "Draw Molecule (Ketcher)" button.
 - **Portable Builds:** Includes a PyInstaller script to create a standalone, portable version for Windows.
 
-## What's New in v2.1
+## What's New in v2.2
 
-### 🎨 **Professional UI Enhancements**
-- **Custom Application Icon:** ORCAView logo now appears in window title bars, taskbar, and throughout the interface
-- **Enhanced 2D Depiction:** Coordinates tab displays ORCAView logo initially, seamlessly replaced by molecule structure when SMILES is parsed
-- **Save Input File Only:** New button in Submission tab allows saving ORCA input files without adding to job queue
+### 🔬 **Expanded Method Support**
+- **Comprehensive DFT Functionals:** Added complete coverage of LDA, GGA, Meta-GGA, Hybrid, Double-Hybrid, and Dispersion-Corrected functionals (80+ total functionals)
+- **Complete Basis Set Library:** Expanded basis set collection with 100+ basis sets organized by family (Pople, Dunning, Karlsruhe/Ahlrichs, Jensen, Sapporo, ANO, ECP, Relativistic)
+- **Updated Semiempirical Methods:** Accurate ORCA 6.1 compatible semiempirical methods including AM1, PM3, MNDO, and ZINDO/ZNDDO variants
+- **Separated xTB Methods:** Dedicated xTB method category with GFN0-xTB, GFN1-xTB, GFN2-xTB, and GFN-FF
+- **Organized Dropdown Menus:** All method dropdowns now feature family separators for easier navigation
 
-### 🚀 **Improved Job Queue System**
-- **Eliminated .bat File Generation:** Direct ORCA execution without creating temporary batch files, keeping project directories clean
-- **Enhanced Job Management:** Right-click context menu options to remove individual finished jobs or bulk remove all finished jobs
-- **Real-time Status Updates:** Improved job status transitions with proper UI refresh when jobs complete and new ones start
-- **Automatic Cleanup:** Legacy .bat files from previous versions are automatically removed on startup
+### 🐛 **Bug Fixes**
+- **Parallel Job Submission:** Fixed ORCA parallel job execution by using full input file paths instead of relative paths
+- **Method Organization:** Resolved inconsistencies in method categorization and availability
 
-### 🔧 **Technical Improvements**
-- **Direct Process Execution:** More efficient ORCA job launching with proper stdout/stderr redirection
-- **Thread-safe Operations:** Enhanced job queue management with proper locking and synchronization
-- **Error Handling:** Comprehensive validation and user feedback for all job operations
-- **Memory Management:** Improved resource cleanup and leak prevention
+### 📚 **Technical Updates**
+- **ORCA 6.1 Compatibility:** All methods and basis sets verified for ORCA 6.1 compatibility
+- **Code Organization:** Improved separation of configuration data and UI logic
+- **Centralized Method Lists:** Method definitions now centralized in config files for easier maintenance
 
 ## Previous Updates (v1.3.0)
 

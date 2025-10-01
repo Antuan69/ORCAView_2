@@ -15,49 +15,19 @@ class MethodTab(QWidget):
         self.dft_pane = QWidget()
         self.dft_layout = QFormLayout(self.dft_pane)
         self.dft_functional_combo = QComboBox()
-        # Populate with all official ORCA 6.1 DFT functionals (deduplicated)
-        # Grouped by type for dropdown
-        dft_functionals_grouped = {
-            "Local Functionals": [
-                "HFS", "LDA", "LSD", "VWN", "VWN5", "VWN3", "PWLDA"
-            ],
-            "GGA / meta-GGA Functionals": [
-                "BP86", "BLYP", "OLYP", "GLYP", "XLYP", "PW91", "MPWPW", "MPWLYP", "PBE", "RPBE", "REVPBE", "RPW86PBE", "PWP", "B97-3C",
-                "B97M-V", "B97M-D3BJ", "B97M-D4", "SCANFUNC", "RSCAN", "R2SCAN", "M06L", "TPSS", "REVTPSS", "R2SCAN-3C"
-            ],
-            "Hybrid Functionals": [
-                "B1LYP", "B3LYP", "B3LYP/G", "O3LYP", "X3LYP", "B1P86", "B3P86", "B3PW91", "PW1PW", "MPW1PW", "MPW1LYP", "PBE0", "REVPBE0", "REVPBE38", "BHANDHLYP", "M06", "M062X", "PW6B95", "TPSSH", "TPSS0", "R2SCANH", "R2SCAN0", "R2SCAN50", "PBEH-3C", "B3LYP-3C"
-            ],
-            "Double-Hybrid Functionals": [
-                "DSD-BLYP D3BJ", "DSD-BLYP/2013", "DSD-BLYP/2013 D3BJ", "DSD-PBEP86 D3BJ", "DSD-PBEP86/2013", "DSD-PBEP86/2013 D3BJ", "DSD-PBEB95", "DSD-PBEB95 D3BJ", "B2PLYP", "MPW2PLYP", "B2GP-PLYP", "B2K-PLYP", "B2T-PLYP", "B2NC-PLYP", "PWPB95", "PBE-QIDH", "PBE0-DH", "REVDSD-PBEP86/2021", "REVDSD-PBEP86-D4/2021", "REVDOD-PBEP86/2021", "REVDOD-PBEP86-D4/2021"
-            ]
-        }
         self.dft_functional_combo.clear()
-        for group, items in dft_functionals_grouped.items():
+        for group, items in dft_functionals.items():
             self.dft_functional_combo.addItem(f"-- {group} --")
             idx = self.dft_functional_combo.count() - 1
             self.dft_functional_combo.model().item(idx).setEnabled(False)
             self.dft_functional_combo.addItems(items)
 
         self.dft_basis_set_combo = QComboBox()
-        # Official ORCA 6.1 basis sets
-        official_basis_sets = {
-            "Karlsruhe def2": [
-                "def2-SVP", "def2-SV(P)", "def2-TZVP", "def2-TZVP(-f)", "def2-TZVPP", "def2-QZVP", "def2-QZVPP",
-                "def2-SVPD", "def2-TZVPD", "def2-TZVPPD", "def2-QZVPD", "def2-QZVPPD",
-                "ma-def2-SVP", "ma-def2-SV(P)", "ma-def2-mSVP", "ma-def2-TZVP", "ma-def2-TZVP(-f)", "ma-def2-TZVPP", "ma-def2-QZVPP"
-            ],
-            "Ahlrichs": [
-                "SV", "SV(P)", "SVP", "TZV", "TZV(P)", "TZVP", "TZVPP", "QZVP", "QZVPP",
-                "def-SV(P)", "def-SVP", "def-TZVP", "def-TZVPP", "ma-def-TZVP",
-                "old-SV", "old-SV(P)", "old-SVP", "old-TZV", "old-TZV(P)", "old-TZVP", "old-TZVPP"
-            ],
-            "Pople": [
-                "STO-3G", "3-21G", "3-21GSP", "4-22GSP", "6-31G", "6-31G*", "m6-31G", "m6-31G*", "6-31G**", "6-31G(d)", "6-31G(d,p)", "6-31G(2d)", "6-31G(2d,p)", "6-31G(2d,2p)", "6-31G(2df)", "6-31G(2df,2p)", "6-31G(2df,2pd)", "6-31+G*", "6-31+G**", "6-31+G(d)", "6-31+G(d,p)", "6-31+G(2d)", "6-31+G(2d,p)", "6-31+G(2d,2p)", "6-31+G(2df)", "6-31+G(2df,2p)", "6-31+G(2df,2pd)", "6-31++G**", "6-31++G(d,p)", "6-31++G(2d,p)", "6-31++G(2d,2p)", "6-31++G(2df,2p)", "6-31++G(2df,2pd)", "6-311G", "6-311G*", "6-311G**", "6-311G(d)", "6-311G(d,p)", "6-311G(2d)", "6-311G(2d,p)", "6-311G(2d,2p)", "6-311G(2df)", "6-311G(2df,2p)", "6-311G(2df,2pd)", "6-311G(3df)", "6-311G(3df,3pd)", "6-311+G*", "6-311+G**", "6-311+G(d)", "6-311+G(d,p)", "6-311+G(2d)", "6-311+G(2d,p)", "6-311+G(2d,2p)", "6-311+G(2df)", "6-311+G(2df,2p)", "6-311+G(2df,2pd)", "6-311+G(3df)", "6-311+G(3df,2p)", "6-311+G(3df,3pd)", "6-311++G**", "6-311++G(d,p)", "6-311++G(2d,p)", "6-311++G(2d,2p)", "6-311++G(2df,2p)", "6-311++G(2df,2pd)", "6-311++G(3df,3pd)"
-            ]
-        }
-        for group, items in official_basis_sets.items():
+        # Use basis sets from config.py
+        for group, items in basis_sets.items():
             self.dft_basis_set_combo.addItem(f"-- {group} --")
+            idx = self.dft_basis_set_combo.count() - 1
+            self.dft_basis_set_combo.model().item(idx).setEnabled(False)
             self.dft_basis_set_combo.addItems(items)
 
         self.dft_layout.addRow("DFT Functional:", self.dft_functional_combo)
@@ -91,8 +61,10 @@ class MethodTab(QWidget):
         ]
         self.hf_method_combo.addItems(hf_methods)
         self.hf_basis_set_combo = QComboBox()
-        for group, items in official_basis_sets.items():
+        for group, items in basis_sets.items():
             self.hf_basis_set_combo.addItem(f"-- {group} --")
+            idx = self.hf_basis_set_combo.count() - 1
+            self.hf_basis_set_combo.model().item(idx).setEnabled(False)
             self.hf_basis_set_combo.addItems(items)
 
         self.hf_layout.addRow("HF Method:", self.hf_method_combo)
@@ -103,11 +75,9 @@ class MethodTab(QWidget):
         self.semi_pane = QWidget()
         semi_layout = QFormLayout(self.semi_pane)
         self.semiempirical_combo = QComboBox()
-        # Populate with deduplicated Table 3.22 semiempirical method keywords
-        semiempirical_keywords = [
-            "AM1", "PM3", "MNDO", "CNDO", "INDO", "ZINDO", "NDDO"
-        ]
-        self.semiempirical_combo.addItems(semiempirical_keywords)
+        # Populate with semiempirical methods from config.py
+        for method, keyword in semiempirical_methods.items():
+            self.semiempirical_combo.addItem(method)
         semi_layout.addRow("Semi-Empirical Method:", self.semiempirical_combo)
         self.method_stack.addWidget(self.semi_pane)
 
@@ -115,11 +85,9 @@ class MethodTab(QWidget):
         self.xtb_pane = QWidget()
         xtb_layout = QFormLayout(self.xtb_pane)
         self.xtb_combo = QComboBox()
-        # Populate with deduplicated Table 3.25 xTB method keywords
-        xtb_keywords = [
-            "GFN0-xTB", "GFN1-xTB", "GFN2-xTB", "GFN-FF"
-        ]
-        self.xtb_combo.addItems(xtb_keywords)
+        # Populate with xTB methods from config.py
+        for method, keyword in xtb_methods.items():
+            self.xtb_combo.addItem(method)
         xtb_layout.addRow("xTB Method:", self.xtb_combo)
         self.method_stack.addWidget(self.xtb_pane)
 
@@ -135,7 +103,7 @@ class MethodTab(QWidget):
             self.method_stack.setCurrentWidget(self.dft_pane)
         elif method == "HF":
             self.method_stack.setCurrentWidget(self.hf_pane)
-        elif method == "Semi-Empirical":
+        elif method == "Semiempirical":
             self.method_stack.setCurrentWidget(self.semi_pane)
         elif method == "xTB":
             self.method_stack.setCurrentWidget(self.xtb_pane)

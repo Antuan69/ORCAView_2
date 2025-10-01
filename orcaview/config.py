@@ -19,27 +19,40 @@ JOB_TYPES = {
 METHODS = ["DFT", "HF", "Semiempirical", "xTB"]
 
 DFT_FUNCTIONALS = {
-    "LDA": ["Slater/VWN", "LDA", "VWN", "VWN5", "VWN3", "PZ81", "PWLDA"],
+    "Local (LDA)": [
+        "HFS", "LDA", "LSD", "VWN", "VWN5", "VWN3", "PWLDA"
+    ],
     "GGA": [
-        "BP86", "PBE", "BLYP", "revPBE", "RPBE", "PW91", "B97-D3", "OLYP",
-        "HCTH120", "HCTH147", "HCTH407", "N12", "B88", "PBEX", "PW86", "G96", 
-        "mPBE", "rPBE", "HCTH93", "OPTX", "P86", "PBEC", "LYP", "mPWPW"
+        "BP86", "BLYP", "OLYP", "GLYP", "XLYP", "PW91", "MPWPW", "MPWLYP", 
+        "PBE", "RPBE", "REVPBE", "RPW86PBE", "PWP", "B97-3C"
     ],
     "Meta-GGA": [
-        "TPSS", "revTPSS", "SCAN", "rSCAN", "r2SCAN", "M06-L", "M11-L", "MN12-L",
-        "MS0", "MS1", "MS2", "TPSS0"
+        "B97M-V", "B97M-D3BJ", "B97M-D4", "SCANFUNC", "RSCAN", "R2SCAN", 
+        "M06L", "TPSS", "REVTPSS", "R2SCAN-3C"
     ],
-    "Hybrid": [
-        "B3LYP", "PBE0", "TPSSh", "HSE06", "CAM-B3LYP", "wB97X-D3", "B1LYP",
-        "O3LYP", "X3LYP", "B97", "B97-1", "B97-2", "B97-3", "mPW1PW", "SCAN0",
-        "M06", "M06-2X", "M06-HF", "SOGGA11-X", "LC-BLYP", "wB97", "wB97X", "HSE03"
+    "Global Hybrid": [
+        "B1LYP", "B3LYP", "B3LYP/G", "O3LYP", "X3LYP", "B1P86", "B3P86", 
+        "B3PW91", "PW1PW", "MPW1PW", "MPW1LYP", "PBE0", "REVPBE0", "REVPBE38", 
+        "BHANDHLYL", "M06", "M062X", "PW6B95", "TPSSH", "TPSS0", "R2SCANH", 
+        "R2SCAN0", "R2SCAN50", "PBEH-3C", "B3LYP-3C"
     ],
-    "Double-Hybrid": [
-        "B2PLYP", "mPW2-PLYP", "B2GP-PLYP", "DSD-BLYP-D3", "DSD-PBEP86-D3",
-        "DSD-PBEB95-D3", "PWPB95-D3", "PTPSS-D3", "revDSD-PBEP86-D4"
+    "Range-Separated Hybrid": [
+        "WB97", "WB97X", "WB97X-V", "WB97X-D3", "WB97X-D3BJ", "WB97X-D4", 
+        "WB97X-D4REV", "CAM-B3LYP", "LC-BLYP", "LC-PBE", "WB97M-V", 
+        "WB97M-D3BJ", "WB97M-D4", "WB97M-D4REV", "WR2SCAN", "WB97X-3C"
     ],
-    "Dispersion-Corrected": [
-        "PBE-D3(BJ)", "B3LYP-D3", "PBE-D4", "B3LYP-D4", "VV10", "LC-VV10"
+    "Global Double-Hybrid": [
+        "DSD-BLYP", "DSD-BLYP/2013", "DSD-PBEP86", "DSD-PBEP86/2013", 
+        "DSD-PBEB95", "B2PLYP", "mPW2PLYP", "B2GP-PLYP", "B2K-PLYP", 
+        "B2T-PLYP", "B2NC-PLYP", "PWPB95", "PBE-QIDH", "PBE0-DH", 
+        "REVDSD-PBEP86/2021", "REVDSD-PBEP86-D4/2021", "REVDOD-PBEP86/2021", 
+        "REVDOD-PBEP86-D4/2021"
+    ],
+    "Range-Separated Double-Hybrid": [
+        "WB97M(2)", "WB97X-2", "WPR2SCAN50", "RSX-QIDH", "RSX-0DH", "WB2PLYP", 
+        "WB2GP-PLYP", "WB88PP86", "WPBEPP86", "SCS/SOS-WB2PLYP", "SCS-WB2GP-PLYP", 
+        "SOS-WB2GP-PLYP", "SCS-RSX-QIDH", "SOS-RSX-QIDH", "SCS-WB88PP86", 
+        "SOS-WB88PP86", "SCS-WPBEPP86", "SOS-WPBEPP86"
     ]
 }
 

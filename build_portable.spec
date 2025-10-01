@@ -1,55 +1,79 @@
-# build_portable.spec - Optimized for smaller size
+# build_portable.spec - Complete dependencies for portable app
 # -*- mode: python ; coding: utf-8 -*-
 
 import sys
+import os
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 block_cipher = None
 
-# --- Collect only essential data files ---
+# --- Collect all necessary data files ---
 datas = []
-# Vispy: Only essential shaders and data
-datas += collect_data_files('vispy', includes=['**/*.vert', '**/*.frag', '**/*.glsl'])
 
-# PyQt6: Only platform plugins
-datas += collect_data_files('PyQt6', includes=['Qt6/plugins/platforms/*'])
+# Add application icon
+datas.append(('Icon_logo.png', '.'))
 
-# RDKit: Only essential data files
-datas += collect_data_files('rdkit', includes=['**/*.txt', '**/*.mol'])
+# Ketcher files - include the entire ketcher directory
+if os.path.exists('orcaview/ketcher'):
+    datas.append(('orcaview/ketcher', 'orcaview/ketcher'))
 
-# Hidden imports - minimized list
+# Vispy: Include all necessary shaders and data
+datas += collect_data_files('vispy')
+
+# PyQt6: Include all necessary plugins and data
+datas += collect_data_files('PyQt6')
+
+# PyQt6-WebEngine: Include web engine data
+try:
+    datas += collect_data_files('PyQt6.QtWebEngineCore')
+    datas += collect_data_files('PyQt6.QtWebEngineWidgets')
+except:
+    pass
+
+# RDKit: Include all data files
+datas += collect_data_files('rdkit')
+
+# Flask: Include templates and static files
+datas += collect_data_files('flask')
+
+# Hidden imports - comprehensive list
 hiddenimports = [
     'PyQt6.sip',
+    'PyQt6.QtTest',
+    'PyQt6.QtWebEngineCore',
+    'PyQt6.QtWebEngineWidgets',
+    'PyQt6.QtWebChannel',
     'vispy.app.backends._pyqt6',
-    'vispy.visuals.line',
-    'vispy.visuals.markers',
-    'vispy.visuals.mesh',
-    'vispy.scene.visuals.line',
-    'vispy.scene.visuals.markers', 
-    'vispy.scene.visuals.mesh'
+    'flask',
+    'werkzeug',
+    'jinja2',
+    'markupsafe',
+    'itsdangerous',
+    'click',
+    'blinker'
 ]
 
-# Exclude unnecessary modules to reduce size
+# Add all vispy submodules
+hiddenimports += collect_submodules('vispy.visuals')
+hiddenimports += collect_submodules('vispy.scene.visuals')
+hiddenimports += collect_submodules('vispy.app.backends')
+
+# Add RDKit submodules
+hiddenimports += [
+    'rdkit.Chem.Draw',
+    'rdkit.Chem.Draw.MolDrawing',
+    'rdkit.Chem.AllChem',
+    'rdkit.Chem.rdDetermineBonds'
+]
+
+# Exclude only truly unnecessary modules
 excludes = [
     'PySide6',
     'tkinter',
     'matplotlib',
     'IPython',
     'jupyter',
-    'notebook',
-    'scipy',
-    'pandas',
-    'PIL.ImageQt',
-    'PyQt6.QtMultimedia',
-    'PyQt6.QtMultimediaWidgets',
-    'PyQt6.QtBluetooth',
-    'PyQt6.QtNfc',
-    'PyQt6.QtPositioning',
-    'PyQt6.QtSensors',
-    'PyQt6.QtSerialPort',
-    'PyQt6.QtSql',
-    'PyQt6.QtTest',
-    'PyQt6.QtXml'
+    'notebook'
 ]
 
 a = Analysis(
@@ -83,14 +107,15 @@ exe = EXE(
     name='ORCAView',
     debug=False,
     bootloader_ignore_signals=False,
-    strip=True,  # Strip debug symbols
-    upx=True,    # Compress with UPX
+    strip=False,  # Don't strip to preserve functionality
+    upx=False,    # Disable UPX to avoid compatibility issues
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='Icon_logo.png'  # Set application icon
 )
 
 coll = COLLECT(
@@ -98,12 +123,8 @@ coll = COLLECT(
     a.binaries,
     a.zipfiles,
     a.datas,
-    strip=True,   # Strip debug symbols from binaries
-    upx=True,     # Compress binaries with UPX
-    upx_exclude=[
-        'vcruntime140.dll',
-        'msvcp140.dll',
-        'api-ms-win-*.dll'
-    ],
+    strip=False,   # Don't strip to preserve functionality
+    upx=False,     # Disable UPX to avoid compatibility issues
+    upx_exclude=[],
     name='ORCAView',
 )

@@ -1,4 +1,4 @@
-# ORCAView v2.3 Dependencies - Optimized for Performance & Size
+# ORCAView v2.4 Dependencies - Optimized for Performance & Size
 # Core application framework
 PyQt6>=6.6.0
 

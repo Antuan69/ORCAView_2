@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QFormLayout, QComboBox, QStackedWidget, QTextEdit, QVBoxLayout, QLabel
 from PyQt6.QtCore import Qt
-from ..method_info import DFT_FUNCTIONAL_INFO, BASIS_SET_INFO, SEMIEMPIRICAL_INFO, XTB_INFO, DISPERSION_INFO, METHOD_RECOMMENDATIONS
+from ..method_info import DFT_FUNCTIONAL_INFO, BASIS_SET_INFO, SEMIEMPIRICAL_INFO, XTB_INFO, DISPERSION_INFO, METHOD_RECOMMENDATIONS, evaluate_method_combination
 
 class MethodTab(QWidget):
     def __init__(self, methods, dft_functionals, basis_sets, semiempirical_methods, xtb_methods, parent=None):
@@ -59,9 +59,6 @@ class MethodTab(QWidget):
         self.dft_info_widget = self._create_info_viewer()
         dft_main_layout.addWidget(self.dft_info_widget)
         
-        # Add stretch to push info viewer up
-        dft_main_layout.addStretch()
-        
         # Connect DFT combo boxes to info updates
         self.dft_functional_combo.currentTextChanged.connect(self._update_dft_info)
         self.dft_basis_set_combo.currentTextChanged.connect(self._update_dft_info)
@@ -101,9 +98,6 @@ class MethodTab(QWidget):
         self.hf_info_widget = self._create_info_viewer()
         hf_main_layout.addWidget(self.hf_info_widget)
         
-        # Add stretch to push info viewer up
-        hf_main_layout.addStretch()
-        
         # Connect HF combo box to info updates
         self.hf_basis_set_combo.currentTextChanged.connect(self._update_hf_info)
         
@@ -127,9 +121,6 @@ class MethodTab(QWidget):
         # Semi-empirical Information viewer - positioned right after controls
         self.semi_info_widget = self._create_info_viewer()
         semi_main_layout.addWidget(self.semi_info_widget)
-        
-        # Add stretch to push info viewer up
-        semi_main_layout.addStretch()
         
         # Connect semi-empirical combo box to info updates
         self.semiempirical_combo.currentTextChanged.connect(self._update_semi_info)
@@ -155,9 +146,6 @@ class MethodTab(QWidget):
         self.xtb_info_widget = self._create_info_viewer()
         xtb_main_layout.addWidget(self.xtb_info_widget)
         
-        # Add stretch to push info viewer up
-        xtb_main_layout.addStretch()
-        
         # Connect xTB combo box to info updates
         self.xtb_combo.currentTextChanged.connect(self._update_xtb_info)
         
@@ -181,7 +169,7 @@ class MethodTab(QWidget):
         title_label.setStyleSheet("""
             QLabel {
                 font-weight: bold; 
-                font-size: 11px; 
+                font-size: 12px; 
                 color: #ffffff;
                 background-color: transparent;
                 padding: 4px 8px;
@@ -191,7 +179,6 @@ class MethodTab(QWidget):
         
         # Text area for information
         info_text = QTextEdit()
-        info_text.setMaximumHeight(140)  # Increased from 100px to 140px
         info_text.setReadOnly(True)
         info_text.setStyleSheet("""
             QTextEdit {
@@ -199,7 +186,7 @@ class MethodTab(QWidget):
                 border: 1px solid #555555;
                 border-radius: 4px;
                 padding: 8px;
-                font-size: 10px;
+                font-size: 12px;
                 line-height: 1.3;
                 color: #e0e0e0;
                 selection-background-color: #0078d4;
@@ -237,27 +224,51 @@ class MethodTab(QWidget):
         # Skip group separators
         if functional.startswith("--") or basis_set.startswith("--"):
             return
-            
-        # Add functional information
+        
+        # Add individual component information first
         if functional in DFT_FUNCTIONAL_INFO:
-            info_text += f"**{functional} Functional:**\n{DFT_FUNCTIONAL_INFO[functional]}\n\n"
+            func_info = DFT_FUNCTIONAL_INFO[functional]
+            # Take first two sentences for more detail
+            sentences = func_info.split('.')[:2]
+            summary = '. '.join(sentences) + '.' if len(sentences) >= 2 else sentences[0] + '.'
+            info_text += f"**{functional} Functional:**\n{summary}\n\n"
         
-        # Add basis set information
         if basis_set in BASIS_SET_INFO:
-            info_text += f"**{basis_set} Basis Set:**\n{BASIS_SET_INFO[basis_set]}\n\n"
+            basis_info = BASIS_SET_INFO[basis_set]
+            # Take first two sentences for more detail
+            sentences = basis_info.split('.')[:2]
+            summary = '. '.join(sentences) + '.' if len(sentences) >= 2 else sentences[0] + '.'
+            info_text += f"**{basis_set} Basis Set:**\n{summary}\n\n"
         
-        # Add dispersion correction information
-        if dispersion and dispersion in DISPERSION_INFO:
-            info_text += f"**{dispersion} Dispersion:**\n{DISPERSION_INFO[dispersion]}\n\n"
+        if dispersion and dispersion in DISPERSION_INFO and dispersion != "None":
+            disp_info = DISPERSION_INFO[dispersion]
+            # Take first sentence for dispersion
+            first_sentence = disp_info.split('.')[0] + '.'
+            info_text += f"**{dispersion} Dispersion:**\n{first_sentence}\n\n"
         
-        # Add general recommendations
-        info_text += "**General Recommendations:**\n"
-        for application, recommendation in METHOD_RECOMMENDATIONS.items():
-            if any(method in recommendation.lower() for method in [functional.lower(), basis_set.lower()]):
-                info_text += f"• {application}: {recommendation}\n"
+        # Get combination evaluation
+        evaluation = evaluate_method_combination(functional, basis_set, dispersion)
+        
+        if evaluation:
+            # Add combination assessment
+            info_text += "─" * 50 + "\n"
+            info_text += f"**COMBINATION ASSESSMENT: {evaluation['overall_grade']} ({evaluation['accuracy_level']})**\n"
+            info_text += f"**Cost:** {evaluation['computational_cost']} | **System Size:** {evaluation['system_size_limit']}\n"
+            
+            # Add recommended applications
+            if evaluation['recommended_for']:
+                info_text += f"**Best for:** {', '.join(evaluation['recommended_for'][:3])}\n"
+            
+            # Add warnings if any
+            if evaluation['warnings']:
+                info_text += f"**⚠️ Warnings:** {'; '.join(evaluation['warnings'][:2])}\n"
+            
+            # Add improvement suggestions
+            if evaluation['improvements']:
+                info_text += f"**💡 Suggestions:** {evaluation['improvements'][0]}\n"
         
         if not info_text.strip():
-            info_text = f"Information for {functional} functional, {basis_set} basis set, and {dispersion} dispersion is not available in the database."
+            info_text = f"Evaluating {functional}/{basis_set} combination..."
         
         self.dft_info_widget.text_widget.setPlainText(info_text)
 

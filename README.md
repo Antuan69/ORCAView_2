@@ -1,4 +1,4 @@
-# ORCAView v2.3
+# ORCAView v2.4
 
 A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program](https://orcaforum.kofo.mpg.de/). ORCAView simplifies the process of creating, running, and analyzing ORCA calculations with a professional, feature-rich interface.
 
@@ -24,7 +24,35 @@ A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program]
 - **Ketcher Molecular Editor:** Draw molecules in a 2D editor and import them directly into the coordinates tab. The editor is launched via the "Draw Molecule (Ketcher)" button.
 - **Portable Builds:** Includes a PyInstaller script to create a standalone, portable version for Windows.
 
-## What's New in v2.3
+## What's New in v2.4
+
+### 🧠 **Intelligent Method Combination Evaluation System**
+- **Smart Assessment:** Real-time evaluation of DFT functional + basis set + dispersion combinations with letter grades (A+ to D)
+- **Comprehensive Database:** 50+ functionals and 70+ basis sets with detailed quality assessments and cost analysis
+- **Actionable Recommendations:** Specific warnings, improvement suggestions, and application-specific guidance
+- **Cost-Accuracy Analysis:** System size limits from >1000 atoms to <10 atoms based on computational cost
+- **Confidence Levels:** Assessment confidence from "Very Low" to "Very High" for informed decision-making
+
+### 📊 **Enhanced Method Information Display**
+- **Detailed Component Information:** Comprehensive descriptions for every DFT functional, basis set, and dispersion correction
+- **Complete Pople Coverage:** All 60+ Pople basis sets (6-31G through 6-311++G(3df,3pd)) with specific applications and warnings
+- **Karlsruhe def2 Series:** Full coverage including ma-def2 and specialized variants
+- **Reorganized Layout:** Component details first, followed by combination assessment with clear visual separation
+- **Expanded Info Window:** Full-height display eliminates scrolling for comprehensive method information
+
+### 🔬 **Advanced Method Database**
+- **Quality Scoring:** 3.0-9.8 scale assessment for accuracy and reliability
+- **Application-Specific Guidance:** Targeted recommendations for Organic Chemistry, Transition Metals, Excited States, Benchmark calculations
+- **Detailed Warnings:** Linear dependence issues, missing polarization functions, cost considerations, element limitations
+- **Improvement Pathways:** Specific upgrade suggestions for basis sets, dispersion corrections, and functionals
+
+### 🎯 **User Experience Improvements**
+- **Larger Font Size:** Increased to 12px throughout the method information viewer for better readability
+- **Full-Height Display:** Info window expands to application bottom edge for maximum information visibility
+- **Intelligent Formatting:** Two-sentence summaries for components, concise combination assessments
+- **Visual Hierarchy:** Clear separation between component information and evaluation results
+
+## Previous Updates (v2.3)
 
 ### 🚀 **Performance & Size Optimizations**
 - **Reduced Build Size:** Optimized PyInstaller configuration reduces standalone build size by 40-60% (from ~250MB to ~120-180MB)
@@ -37,16 +65,6 @@ A modern graphical user interface (GUI) for the [ORCA Quantum Chemistry Program]
 - **Removed Dead Code:** Eliminated unused files (`debug_viewer.py`, `job_submitter.py`) and legacy dependencies
 - **Enhanced Error Handling:** Improved exception handling with proper logging levels and user feedback
 - **Optimized Imports:** Cleaned up import statements and removed unused dependencies
-
-### 📦 **Build System Enhancements**
-- **Streamlined Dependencies:** Removed Pillow and other unused libraries from core requirements
-- **Optimized PyInstaller:** Enhanced build configuration with selective module inclusion and UPX compression
-- **Development Dependencies:** Separated build tools from runtime requirements for cleaner deployments
-
-### 🐛 **Bug Fixes & Maintenance**
-- **Removed Composite Methods:** Cleaned up job type dropdown by removing unused "Composite Methods" option
-- **Improved Stability:** Better resource cleanup and error recovery mechanisms
-- **Code Sanitization:** Comprehensive audit and cleanup of the entire codebase
 
 ## Previous Updates (v1.3.0)
 

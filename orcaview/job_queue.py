@@ -109,7 +109,27 @@ class JobQueueManager:
                     if job.orca_path:
                         orca_dir = os.path.dirname(os.path.abspath(job.orca_path))
                         old_path = env.get('PATH', '')
+                        # Add ORCA directory to PATH for MPI and other dependencies
                         env['PATH'] = orca_dir + os.pathsep + old_path
+                        
+                        # Set ORCA-specific environment variables for better compatibility
+                        env['RSH_COMMAND'] = 'ssh'  # For remote shell if needed
+                        env['ORCA_EXE_DIR'] = orca_dir  # ORCA executable directory
+                        
+                        # Disable MPI if mpiexec is not available (common in portable setups)
+                        try:
+                            # Check if mpiexec is available
+                            subprocess.run(['mpiexec', '--version'], 
+                                         capture_output=True, timeout=5, env=env)
+                            print('MPI available - parallel execution enabled')
+                        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
+                            print('MPI not available - forcing serial execution')
+                            # Force ORCA to run in serial mode by setting nprocs to 1
+                            env['ORCA_NPROCS'] = '1'
+                            env['ORCA_MPI_PROCS'] = '1'
+                            # Disable OpenMPI warnings about missing components
+                            env['OMPI_MCA_btl_base_warn_component_unused'] = '0'
+                            env['OMPI_MCA_mpi_warn_on_fork'] = '0'
                     print('STEP: about to set input_dir and creationflags')
                     input_dir = os.path.dirname(os.path.abspath(job.input_path))
                     creationflags = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0
@@ -118,6 +138,63 @@ class JobQueueManager:
                     # Use full absolute paths for both ORCA executable and input file for parallel job support
                     orca_executable = os.path.abspath(job.orca_path)
                     input_file = os.path.abspath(job.input_path)
+                    
+                    # If MPI is not available, modify input file to force serial execution
+                    if env.get('ORCA_NPROCS') == '1':
+                        print('Modifying input file for serial execution')
+                        try:
+                            # Read the input file
+                            with open(input_file, 'r') as f:
+                                input_content = f.read()
+                            
+                            # Check if %pal block exists and modify it
+                            lines = input_content.split('\n')
+                            modified_lines = []
+                            in_pal_block = False
+                            pal_block_modified = False
+                            
+                            for line in lines:
+                                line_stripped = line.strip().lower()
+                                if line_stripped.startswith('%pal'):
+                                    in_pal_block = True
+                                    modified_lines.append(line)
+                                elif in_pal_block and line_stripped == 'end':
+                                    in_pal_block = False
+                                    if not pal_block_modified:
+                                        # Add nprocs 1 before end
+                                        modified_lines.append('   nprocs 1')
+                                        pal_block_modified = True
+                                    modified_lines.append(line)
+                                elif in_pal_block and 'nprocs' in line_stripped:
+                                    # Replace existing nprocs with 1
+                                    modified_lines.append('   nprocs 1')
+                                    pal_block_modified = True
+                                else:
+                                    modified_lines.append(line)
+                            
+                            # If no %pal block exists, add one
+                            if not pal_block_modified:
+                                # Find the first line that doesn't start with ! or #
+                                insert_index = 0
+                                for i, line in enumerate(modified_lines):
+                                    if not line.strip().startswith(('!', '#', '%')):
+                                        insert_index = i
+                                        break
+                                
+                                # Insert %pal block
+                                modified_lines.insert(insert_index, '%pal')
+                                modified_lines.insert(insert_index + 1, '   nprocs 1')
+                                modified_lines.insert(insert_index + 2, 'end')
+                                modified_lines.insert(insert_index + 3, '')
+                            
+                            # Write back the modified content
+                            with open(input_file, 'w') as f:
+                                f.write('\n'.join(modified_lines))
+                            
+                            print('Input file modified for serial execution')
+                        except Exception as e:
+                            print(f'Warning: Could not modify input file for serial execution: {e}')
+                    
                     orca_cmd = [orca_executable, input_file]
                     
                     print('ABOUT TO LAUNCH ORCA DIRECTLY:', orca_cmd)

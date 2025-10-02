@@ -116,13 +116,68 @@ class JobQueueManager:
                         env['RSH_COMMAND'] = 'ssh'  # For remote shell if needed
                         env['ORCA_EXE_DIR'] = orca_dir  # ORCA executable directory
                         
-                        # Disable MPI if mpiexec is not available (common in portable setups)
+                        # Check MPI availability with improved detection
+                        mpi_available = False
                         try:
-                            # Check if mpiexec is available
-                            subprocess.run(['mpiexec', '--version'], 
-                                         capture_output=True, timeout=5, env=env)
+                            # Try multiple MPI detection methods
+                            print('Testing MPI availability...')
+                            
+                            # Method 1: Check mpiexec with help flag (more compatible than --version)
+                            result = subprocess.run(['mpiexec', '-help'], 
+                                                   capture_output=True, timeout=10, env=env, text=True)
+                            print(f'mpiexec -help exit code: {result.returncode}')
+                            print(f'mpiexec stdout: {result.stdout[:200]}...' if result.stdout else 'No stdout')
+                            
+                            # Consider MPI available if mpiexec responds (even with non-zero exit code)
+                            mpi_available = True
                             print('MPI available - parallel execution enabled')
-                        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
+                            
+                        except FileNotFoundError:
+                            print('mpiexec not found in PATH - trying alternative detection')
+                            
+                            # Method 2: Check for common MPI installations
+                            mpi_paths = [
+                                'mpiexec.exe',
+                                r'C:\Program Files\Microsoft MPI\Bin\mpiexec.exe',
+                                r'C:\Program Files (x86)\Microsoft MPI\Bin\mpiexec.exe',
+                                r'C:\Program Files\Intel\MPI\*\bin\mpiexec.exe'
+                            ]
+                            
+                            for mpi_path in mpi_paths:
+                                if '*' in mpi_path:
+                                    # Handle wildcard paths
+                                    import glob
+                                    matches = glob.glob(mpi_path)
+                                    if matches:
+                                        print(f'Found MPI at: {matches[0]}')
+                                        mpi_available = True
+                                        # Add MPI directory to PATH
+                                        mpi_dir = os.path.dirname(matches[0])
+                                        env['PATH'] = mpi_dir + os.pathsep + env['PATH']
+                                        break
+                                else:
+                                    import os
+                                    if os.path.exists(mpi_path):
+                                        print(f'Found MPI at: {mpi_path}')
+                                        mpi_available = True
+                                        # Add MPI directory to PATH
+                                        mpi_dir = os.path.dirname(mpi_path)
+                                        env['PATH'] = mpi_dir + os.pathsep + env['PATH']
+                                        break
+                            
+                            if not mpi_available:
+                                print('No MPI installation detected')
+                                
+                        except subprocess.TimeoutExpired:
+                            print('mpiexec command timed out - assuming MPI is available but slow')
+                            mpi_available = True
+                            
+                        except Exception as e:
+                            print(f'MPI detection error: {e} - assuming MPI is available')
+                            mpi_available = True
+                        
+                        # Only force serial execution if MPI is definitely not available
+                        if not mpi_available:
                             print('MPI not available - forcing serial execution')
                             # Force ORCA to run in serial mode by setting nprocs to 1
                             env['ORCA_NPROCS'] = '1'
@@ -130,6 +185,8 @@ class JobQueueManager:
                             # Disable OpenMPI warnings about missing components
                             env['OMPI_MCA_btl_base_warn_component_unused'] = '0'
                             env['OMPI_MCA_mpi_warn_on_fork'] = '0'
+                        else:
+                            print('MPI detected - allowing parallel execution')
                     print('STEP: about to set input_dir and creationflags')
                     input_dir = os.path.dirname(os.path.abspath(job.input_path))
                     creationflags = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0
@@ -139,7 +196,7 @@ class JobQueueManager:
                     orca_executable = os.path.abspath(job.orca_path)
                     input_file = os.path.abspath(job.input_path)
                     
-                    # If MPI is not available, modify input file to force serial execution
+                    # Only modify input file if MPI is not available
                     if env.get('ORCA_NPROCS') == '1':
                         print('Modifying input file for serial execution')
                         try:
@@ -194,6 +251,8 @@ class JobQueueManager:
                             print('Input file modified for serial execution')
                         except Exception as e:
                             print(f'Warning: Could not modify input file for serial execution: {e}')
+                    else:
+                        print('MPI available - preserving original input file for parallel execution')
                     
                     orca_cmd = [orca_executable, input_file]
                     
